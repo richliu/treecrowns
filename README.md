@@ -2,7 +2,7 @@
 
 用 Sentinel-2 衛星影像與樹冠（植生）分析，估算台灣 2018–2025 年新增的太陽光電「蓋之前是什麼地」，特別是砍了多少樹。
 
-- 網站：<https://richliu.github.io/treecrowns/>（鏡像：<https://experiment.techarea.org/>）
+- 網站：<https://richliu.github.io/treecrowns/>
 - 白話說明：[成果說明](https://richliu.github.io/treecrowns/about.html)
 - 簡報：[treecrowns.pptx](https://richliu.github.io/treecrowns/slides/treecrowns.pptx)
 

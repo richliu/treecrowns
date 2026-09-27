@@ -51,7 +51,7 @@ function title(slide, t, sub) {
   if (sub) txt(slide, sub, { x: M, y: 1.15, w: W - 2 * M, h: 0.45, fontSize: 15, color: C.muted });
 }
 function footer(slide, n) {
-  txt(slide, `experiment.techarea.org ｜ github.com/richliu/treecrowns`, { x: M, y: H - 0.42, w: 8, h: 0.3, fontSize: 10, color: "8A958D" });
+  txt(slide, `richliu.github.io/treecrowns ｜ github.com/richliu/treecrowns`, { x: M, y: H - 0.42, w: 8, h: 0.3, fontSize: 10, color: "8A958D" });
   txt(slide, String(n), { x: W - M - 0.6, y: H - 0.42, w: 0.6, h: 0.3, fontSize: 10, color: "8A958D", align: "right" });
 }
 function card(slide, x, y, w, h, fill = C.white) {
@@ -79,7 +79,7 @@ const axisStyle = () => ({
     txt(s, "太陽光電砍了多少樹？", { x: M, y: 2.3, w: 11, h: 1.2, fontSize: 54, bold: true, color: C.white });
     txt(s, `用衛星「樹冠」分析台灣 ${BASE}–${YN} 光電用地變化`, { x: M, y: 3.55, w: 11, h: 0.6, fontSize: 24, color: C.leaf });
     txt(s, "Sentinel-2 衛星 × 農村水保署 BigGIS 植生判釋方法 × 能源署開放資料", { x: M, y: 4.3, w: 11, h: 0.5, fontSize: 16, color: "D8E6D2" });
-    txt(s, "網站 experiment.techarea.org\n原始碼 github.com/richliu/treecrowns", { x: M, y: 6.1, w: 8, h: 0.8, fontSize: 13, color: "D8E6D2" });
+    txt(s, "網站 richliu.github.io/treecrowns\n原始碼 github.com/richliu/treecrowns", { x: M, y: 6.1, w: 8, h: 0.8, fontSize: 13, color: "D8E6D2" });
     s.addNotes("本簡報介紹以 Sentinel-2 衛星影像估算台灣近年新增太陽光電『蓋之前是什麼地』，特別是砍了多少樹。");
   }
 
@@ -354,7 +354,7 @@ const axisStyle = () => ({
     }
     txt(s, "下一步：區分優良農地 / 一般農地、魚塭 / 鹽田；取得案場座標做逐案驗證；以高解析航照補屋頂型光電。",
         { x: M, y: 6.45, w: W - 2 * M, h: 0.4, fontSize: 13, color: "D8E6D2" });
-    txt(s, "experiment.techarea.org ｜ github.com/richliu/treecrowns", { x: M, y: 6.9, w: 8, h: 0.35, fontSize: 12, color: C.leaf });
+    txt(s, "richliu.github.io/treecrowns ｜ github.com/richliu/treecrowns", { x: M, y: 6.9, w: 8, h: 0.35, fontSize: 12, color: C.leaf });
   }
 
   const out = path.join(ROOT, "public", "slides", "treecrowns.pptx");
