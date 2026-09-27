@@ -80,6 +80,32 @@
     其中<b>絕大多數與光電無關</b>，而是颱風崩塌、開發、伐採等，例如 2025 年花蓮馬太鞍溪一帶。</li>
 </ul>
 
+{% if tiers %}
+<h3 id="cleared" class="h6 fw-bold mt-4">先砍樹、空窗幾年、再蓋光電？</h3>
+<p>有些地方是先把樹砍掉，荒置或短期耕作幾年，才蓋太陽能板。上面「原本是樹林」的 {{ "{:,.0f}".format(P.tree) }} 公頃，
+只算「蓋之前多數年份是樹」的格子，空窗 1–2 年的會被算進去，但空窗更久的不會。我們另外逐年追蹤每一格，結果如下（逐層累加）：</p>
+<table class="table table-sm small">
+  <thead><tr><th>納入的情況</th><th class="text-end">面積</th><th class="text-end">累計</th></tr></thead>
+  <tbody>{% for t in tiers %}
+    <tr><td>{% if not loop.first %}＋ {% endif %}{{ t.label }}<div class="text-muted">{{ t.note }}</div></td>
+      <td class="text-end text-nowrap">{{ "{:,.0f}".format(t.ha) }} 公頃</td>
+      <td class="text-end fw-semibold text-danger text-nowrap">{{ "{:,.0f}".format(t.cum) }} 公頃<br><span class="text-muted fw-normal">{{ t.cum|eq }}</span></td></tr>
+  {% endfor %}</tbody>
+</table>
+<ul>
+  <li>「先砍樹、空窗多年再蓋」約 {{ "{:,.0f}".format(TP.total.cleared) }} 公頃，空窗多為 {{ TP.gap_main }}；空窗期間多半長回草或短期耕作（低植生 {{ TP.cleared_between_classes.get("低植生", 0) }}%），真正裸露的只佔 {{ TP.cleared_between_classes.get("裸露地/建物", 0) }}%。</li>
+  <li>但這一類混有不同原因。例如下面桃園這塊地：2018 年是樹林，2020 年整地，2022 年蓋了大型工廠，2024 年工廠屋頂才裝上太陽能板——<b>樹是為了蓋工廠砍的</b>，不是為了光電。</li>
+  <li>就算把所有可能的情況都算進去，砍樹光電最多約 {{ "{:,.0f}".format(tiers[-1].cum) }} 公頃，仍不到新增光電的 {{ "%.0f"|format(100 * tiers[-1].cum / T.pv_new_total + 0.5) }}%。</li>
+</ul>
+<div class="row g-2 mb-2">
+  {% for y in [2018, 2020, 2022, 2024] %}
+  <div class="col-6 col-md-3 text-center"><img src="{{ root }}static/img/taoyuan_cleared_{{ y }}.png" class="img-fluid rounded" alt="桃園 {{ y }} 年衛星影像">
+    <div class="small fw-semibold">{{ y }}{% if y == 2018 %}：樹林{% elif y == 2020 %}：整地{% elif y == 2022 %}：蓋工廠{% else %}：屋頂光電{% endif %}</div></div>
+  {% endfor %}
+</div>
+<p class="small text-muted">桃園（24.931, 121.186）本研究 Sentinel-2 年度合成影像，約 700 × 700 公尺。</p>
+{% endif %}
+
 <h2>4. 這些數字可信嗎？</h2>
 <ul>
   {% if V %}<li>和能源署公開的 {{ V.towns.plants_n }} 個大型（2 MW 以上）光電案場比對：以鄉鎮為單位，
@@ -91,7 +117,9 @@
 <h2>5. 研究限制（請務必一起看）</h2>
 <ul>
   <li><b>看不到小型與屋頂型光電。</b>衛星一格 10 公尺，0.2 公頃以下的案場、住家與工廠屋頂大多抓不到，所以光電面積是「下限」。</li>
-  <li><b>「樹」的定義會影響結果。</b>本站採嚴格定義（整年都很綠的木本植被），果園、檳榔、竹林可能被算成農地；因此另外提供寬鬆定義的數字。</li>
+  <li><b>「樹」的定義會影響結果。</b>本站採嚴格定義（整年都很綠的木本植被，且蓋之前多數年份是樹），果園、檳榔、竹林可能被算成農地，
+    砍樹後空窗多年才蓋的也不算；因此另外提供寬鬆定義與逐層累加的數字（最多約 {{ "{:,.0f}".format(tiers[-1].cum) if tiers else "" }} 公頃）。</li>
+  <li><b>砍樹不一定是為了光電。</b>衛星只看得到「以前是樹、後來是太陽能板」，看不到砍樹的原因；例如砍樹蓋工廠、之後屋頂裝光電，也會被算進較寬的層級。</li>
   <li><b>2017 年只當參考。</b>那年只有一顆 Sentinel-2 衛星，照片少、樹林會被低估，所以統計從 2018 年開始。</li>
   <li><b>{{ y2 }} 年的新案場還沒有隔年確認</b>，誤判機率較高。</li>
   <li><b>無法逐案對到政府案場。</b>能源署清單只有地號，沒有公開座標，所以只能以鄉鎮比對。</li>

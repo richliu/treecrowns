@@ -59,6 +59,21 @@ def main():
     S = json.loads((DATA / "stats" / "timeseries.json").read_text())
     V = load_json(DATA / "stats" / "validation.json")
     sens = load_json(DATA / "stats" / "sensitivity.json")
+    TP = load_json(DATA / "stats" / "tree_path.json")
+    tiers = None
+    if TP:
+        tt, cum = TP["total"], 0
+        tiers = []
+        for k, label, note in [
+                ("majority", "完工前多數年份是樹", "本站主要數字；含砍樹後空窗 1–2 年"),
+                ("cleared", "先砍樹、空窗多年再蓋", "≥ 2 年是樹，之後到完工都不是樹；空窗多為 3–6 年；混有「為了蓋工廠而砍、屋頂才裝光電」的案例"),
+                ("ref2017", f"{S['baseline']} 年以前就已砍除", "分析年份從未是樹，只有參考年 2017 是樹"),
+                ("once", "只有 1 年被判為樹", "證據弱，可能是果園 / 作物被誤判的雜訊")]:
+            cum += tt[k]
+            tiers.append(dict(key=k, label=label, note=note, ha=tt[k], cum=round(cum, 1)))
+        gaps = TP["cleared_gap_years"]
+        top3 = [int(g) for g, v in sorted(gaps.items(), key=lambda kv: -kv[1])[:3]]
+        TP["gap_main"] = f"{min(top3)}–{max(top3)} 年"
     years = S["years"]; ana = S["analysis_years"]; ref = S["reference_years"]; base = S["baseline"]
     ys = [str(y) for y in years]; b, yN = str(base), ys[-1]
     T = S["total"]; P = T["pred_total"]; newtot = T["pv_new_total"] or 1
@@ -108,7 +123,7 @@ def main():
         ("原為水體（漁電 / 鹽田 / 埤塘）", fmt(P["water"]), "公頃", "text-info", f"佔新增 {pct(P['water'])}"),
         ("原為農地 / 低植生", fmt(P["farm"]), "公頃", "text-warning-emphasis", f"佔新增 {pct(P['farm'])}"),
         ("原為樹冠（砍樹光電）", fmt(P["tree"]), "公頃", "text-danger",
-         f"佔新增 {pct(P['tree'])}" + (f"；寬鬆木本定義 {fmt(sens['total']['woody'])} 公頃" if sens else "")),
+         f"佔新增 {pct(P['tree'])}" + (f"；含砍樹後空窗多年再蓋約 {fmt(tiers[1]['cum'])} 公頃，最寬 {fmt(tiers[-1]['cum'])} 公頃" if tiers else "")),
         ("原為裸露地 / 建物", fmt(P["bare"]), "公頃", "", f"佔新增 {pct(P['bare'])}（含整地、鹽田）"),
         (f"樹冠明確消失 {base + 1}–{yN}", fmt(T["tree_loss_total"]), "公頃", "",
          "轉為裸露地/建物/光電/水體且隔年未恢復（含崩塌）"),
@@ -122,6 +137,7 @@ def main():
              ("data/pv_sites.geojson", "疑似光電案場：完工年、面積、各前身面積、鄉鎮、標高、坡度、山坡地 / 國有林比例"),
              ("data/validation.json", "第二階段驗證：鄉鎮比對、縣市容量比對、地形 / 國有林統計"),
              ("data/sensitivity.json", "砍樹光電定義敏感度（嚴格 / 寬鬆 / 任何植被）"),
+             ("data/tree_path.json", "「先砍樹、空窗、再蓋光電」路徑分析：各層級面積、空窗年數、空窗期類別、縣市"),
              ("data/counties.geojson", "縣市界與統計屬性"),
              ("slides/treecrowns.pptx", "成果簡報（PowerPoint）")]
     sizes = {f: human((PUBLIC / f).stat().st_size) for f, _ in files if (PUBLIC / f).exists()}
@@ -135,15 +151,15 @@ def main():
     class_years = [y for y in years if (PUBLIC / "tiles" / f"class_{y}").exists()]
     sj = json.dumps(S, ensure_ascii=False)
     pages = {
-        "index.html": dict(cards=cards, top_sites=top, sens=sens, summary_json=sj),
+        "index.html": dict(cards=cards, top_sites=top, sens=sens, tiers=tiers, TP=TP, T_new=T["pv_new_total"], summary_json=sj),
         "map.html": dict(ramp_json=json.dumps(ramp), class_years=class_years, tree_frac=TREE_FRAC_SITE),
         "counties.html": dict(counties=S["counties"], summary_json=sj),
         "method.html": dict(params=dict(PARAMS, max_scenes=15),
                             params_json=json.dumps(PARAMS, indent=2, ensure_ascii=False),
-                            tree_frac=TREE_FRAC_SITE),
+                            tree_frac=TREE_FRAC_SITE, tiers=tiers, TP=TP),
         "data.html": dict(files=files, sizes=sizes),
     }
-    pages["about.html"] = dict(T=T, P=P, V=V, sens=sens)
+    pages["about.html"] = dict(T=T, P=P, V=V, sens=sens, tiers=tiers, TP=TP)
     if V:
         pages["validation.html"] = dict(V=V, v_json=json.dumps(V, ensure_ascii=False), summary_json=sj)
     for name, ctx in pages.items():

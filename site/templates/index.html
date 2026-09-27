@@ -54,12 +54,27 @@
       樹冠比例年際 ±2–3% 的起伏多屬合成雜訊。</p>
     </div></div>
   </div>
-  {% if sens %}
+  {% if tiers or sens %}
   <div class="col-lg-6">
     <div class="card border-0 shadow-sm h-100"><div class="card-body">
-      <h2 class="h6 fw-bold">「砍樹」定義的敏感度（完工前 NDVI）</h2>
+      <h2 class="h6 fw-bold">「砍樹光電」有多少？看定義而定</h2>
+      {% if tiers %}
+      <div class="small text-secondary mb-1">① 逐年路徑：完工前的類別序列（逐層累加）</div>
+      <table class="table table-sm small mb-2">
+        <thead><tr><th>納入的情況</th><th class="text-end">公頃</th><th class="text-end">累計</th></tr></thead>
+        <tbody>
+        {% for t in tiers %}
+          <tr{% if loop.first %} class="fw-semibold"{% endif %}><td>{% if not loop.first %}＋ {% endif %}{{ t.label }}
+            <div class="text-muted" style="font-size:.75rem">{{ t.note }}</div></td>
+            <td class="text-end">{{ "{:,.0f}".format(t.ha) }}</td>
+            <td class="text-end fw-semibold text-danger">{{ "{:,.0f}".format(t.cum) }}<div class="text-muted fw-normal" style="font-size:.75rem">{{ "%.1f"|format(100 * t.cum / T_new) }}%</div></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+      {% if sens %}
+      <div class="small text-secondary mb-1">② 完工前的 NDVI（「樹」的寬嚴）</div>
       <table class="table table-sm small mb-0">
-        <thead><tr><th>完工前的地表</th><th class="text-end">公頃</th><th class="text-end">佔新增</th></tr></thead>
         <tbody>
         {% for d in sens.defs %}{% set v = sens.total[d.key] %}
           <tr><td>{{ d.label }}</td><td class="text-end fw-semibold">{{ "{:,.0f}".format(v) }}</td>
@@ -67,7 +82,9 @@
         {% endfor %}
         </tbody>
       </table>
-      <p class="small text-muted mt-2 mb-0">「樹」的定義越寬鬆（含果園、檳榔、竹林），砍樹光電面積越大；以此判讀上下限。</p>
+      {% endif %}
+      <p class="small text-muted mt-2 mb-0">不論哪種定義，砍樹光電都不到新增光電的 6%。「先砍樹、空窗多年再蓋」的空窗多為 {{ TP.gap_main if TP else "" }}，
+      期間多半長回草或短期耕作；也包含「砍樹蓋工廠、之後屋頂裝光電」（見<a href="about.html#cleared">成果說明</a>）。</p>
     </div></div>
   </div>
   {% endif %}

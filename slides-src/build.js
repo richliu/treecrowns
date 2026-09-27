@@ -13,6 +13,10 @@ const J = p => JSON.parse(fs.readFileSync(path.join(ROOT, p), "utf8"));
 const S = J("data/stats/timeseries.json");
 const V = J("data/stats/validation.json");
 const SENS = J("data/stats/sensitivity.json");
+const TP = J("data/stats/tree_path.json");
+const TIERS = (() => { let c = 0; return [["majority", "多數年份是樹"], ["cleared", "＋ 先砍樹、空窗多年再蓋"],
+  ["ref2017", "＋ 2018 前已砍"], ["once", "＋ 只有 1 年是樹"]].map(([k, l]) => { c += TP.total[k]; return { k, l, ha: TP.total[k], cum: c }; }); })();
+const TMAX = TIERS[TIERS.length - 1].cum;
 const SITES = J("public/data/pv_sites.geojson").features.map(f => f.properties);
 const T = S.total, P = T.pred_total, BASE = S.baseline;
 const YN = S.analysis_years[S.analysis_years.length - 1];
@@ -179,7 +183,7 @@ const axisStyle = () => ({
     const s = pres.addSlide(); n++;
     title(s, `結果總覽：${BASE + 1}–${YN} 新增的太陽能板，原本是什麼？`, `全台新增 ${fmt(T.pv_new_total)} 公頃（${eq(T.pv_new_total)}）；${BASE} 年以前已存在 ${fmt(T.pv_existing_baseline)} 公頃`);
     const rows = [["farm", "農地 / 低植生", "約一半，最多"], ["water", "水體（魚塭 / 鹽田 / 埤塘）", "漁電共生、水面型"],
-                  ["bare", "裸露地 / 建物", "含整地、乾鹽田、工業區"], ["tree", "樹林（砍樹光電）", `寬鬆定義（含果園竹林）約 ${fmt(SENS.total.woody)} 公頃`]];
+                  ["bare", "裸露地 / 建物", "含整地、乾鹽田、工業區"], ["tree", "樹林（砍樹光電）", `含空窗多年再蓋 ${fmt(TIERS[1].cum)}，最寬 ${fmt(TMAX)} 公頃`]];
     for (let i = 0; i < 4; i++) {
       const [k, name, note] = rows[i], col = C[k], y = 1.95 + i * 1.2;
       card(s, M, y, 7.3, 1.05);
@@ -290,6 +294,48 @@ const axisStyle = () => ({
     footer(s, n);
   }
 
+  // ===== 10b. 先砍樹、空窗、再蓋 =====
+  {
+    const s = pres.addSlide(); n++;
+    title(s, "先砍樹、空窗幾年、再蓋光電？", "逐年追蹤每一格：把「空窗期較長」的情況也算進來，砍樹光電有多少？");
+    card(s, M, 1.85, 6.3, 3.05);
+    s.addChart(pres.charts.BAR, [{ name: "累計（公頃）", labels: TIERS.map(t => t.l), values: TIERS.map(t => Math.round(t.cum)) }], {
+      x: M + 0.1, y: 1.95, w: 6.1, h: 2.85, barDir: "bar", ...axisStyle(), catAxisOrientation: "maxMin",
+      chartColors: ["DC003C"], showLegend: false, showValue: true, dataLabelPosition: "outEnd", dataLabelFontSize: 12,
+      dataLabelColor: C.ink, dataLabelFormatCode: "#,##0", valAxisHidden: true, valGridLine: { style: "none" },
+      showTitle: true, title: "砍樹光電（逐層累加，公頃）", titleFontSize: 13, catAxisLabelFontSize: 12,
+    });
+    const gy = Object.keys(TP.cleared_gap_years);
+    card(s, M, 5.05, 6.3, 1.85);
+    s.addChart(pres.charts.BAR, [{ name: "面積（公頃）", labels: gy.map(g => `${g} 年`), values: gy.map(g => TP.cleared_gap_years[g]) }], {
+      x: M + 0.1, y: 5.1, w: 3.6, h: 1.75, barDir: "col", ...axisStyle(), chartColors: [C.bare], showLegend: false,
+      showValue: true, dataLabelPosition: "outEnd", dataLabelFontSize: 10, dataLabelFormatCode: "0.0", valAxisHidden: true,
+      valGridLine: { style: "none" }, showTitle: true, title: "空窗幾年才蓋", titleFontSize: 12, catAxisLabelFontSize: 10,
+    });
+    const bc = TP.cleared_between_classes;
+    txt(s, [{ text: "空窗期間多是", options: { breakLine: true, fontSize: 12, color: C.muted } },
+            { text: `低植生 ${bc["低植生"] ?? 0}%`, options: { breakLine: true, fontSize: 16, bold: true, color: C.farm } },
+            { text: `裸露地 ${bc["裸露地/建物"] ?? 0}%`, options: { fontSize: 16, bold: true, color: C.bare } }],
+        { x: M + 3.85, y: 5.35, w: 2.3, h: 1.3, valign: "middle" });
+    const iw = 1.42, x0 = 7.25;
+    txt(s, "例：桃園（24.931, 121.186）", { x: x0, y: 1.85, w: 5.5, h: 0.4, fontSize: 16, bold: true });
+    const cap = { 2018: "樹林", 2020: "整地", 2022: "蓋工廠", 2024: "屋頂光電" };
+    [2018, 2020, 2022, 2024].forEach((y, j) => {
+      s.addImage({ path: path.join(__dirname, "img", `taoyuan_cleared_${y}.png`), x: x0 + j * (iw + 0.08), y: 2.35, w: iw, h: iw });
+      txt(s, `${y} ${cap[y]}`, { x: x0 + j * (iw + 0.08), y: 2.35 + iw + 0.05, w: iw, h: 0.35, fontSize: 12, bold: true, align: "center",
+                                 color: y === 2024 ? C.tree : C.muted });
+    });
+    card(s, x0, 4.4, 5.5, 2.5, C.paper);
+    const pts = [`不含空窗的嚴格數字 ${fmt(TIERS[0].cum)} 公頃；加上「先砍樹、空窗多年再蓋」約 ${fmt(TIERS[1].cum)} 公頃`,
+                 `空窗多為 3–6 年，期間多半長回草或短期耕作`,
+                 `但原因看不到：像桃園這塊，樹是為了蓋工廠砍的，光電是之後裝在屋頂`,
+                 `全部算進去最多約 ${fmt(TMAX)} 公頃，仍不到新增光電的 6%`];
+    txt(s, pts.map((t, i) => ({ text: t, options: { bullet: true, breakLine: i < pts.length - 1 } })),
+        { x: x0 + 0.2, y: 4.55, w: 5.1, h: 2.25, fontSize: 13, paraSpaceAfter: 6, valign: "top" });
+    footer(s, n);
+    s.addNotes("路徑分析：多數年份是樹＝主要數字；≥2 年是樹、之後到完工都不是樹＝先砍樹空窗再蓋；只有 2017 是樹＝基準年前已砍；只有 1 年是樹＝證據弱。");
+  }
+
   // ===== 11. 可信度 =====
   {
     const s = pres.addSlide(); n++;
@@ -323,7 +369,7 @@ const axisStyle = () => ({
     const s = pres.addSlide(); n++;
     title(s, "研究限制", "解讀數字時請一起考慮");
     const lim = [[fa.FaHome, "看不到屋頂與小型光電", "一格 10 公尺，0.2 公頃以下與屋頂型大多抓不到，光電面積是「下限」。"],
-                 [fa.FaTree, "「樹」的定義影響結果", `嚴格定義 ${fmt(P.tree)} 公頃；含果園、檳榔、竹林的寬鬆定義約 ${fmt(SENS.total.woody)} 公頃。`],
+                 [fa.FaTree, "「樹」的定義影響結果", `嚴格 ${fmt(P.tree)} 公頃；含空窗多年再蓋、寬鬆定義最多約 ${fmt(TMAX)} 公頃；且看不到砍樹原因（如砍樹蓋工廠）。`],
                  [fa.FaWater, "農地類別較粗", "「農地/低植生」也包含草生地、海埔地與長藻的魚塭，水體比例可能偏低。"],
                  [fa.FaCalendarAlt, "2017 只當參考", `2017 年只有一顆衛星、觀測少、樹林低估，統計從 ${BASE} 年開始；${YN} 年新案場尚待隔年確認。`],
                  [fa.FaMapPin, "無法逐案對到政府案場", "能源署清單只有地號、沒有公開座標，只能以鄉鎮比對。"],
@@ -345,7 +391,7 @@ const axisStyle = () => ({
     txt(s, "結論", { x: M, y: 0.5, w: 6, h: 0.8, fontSize: 38, bold: true, color: C.white });
     const cons = [[`${fmt(T.pv_new_total)} 公頃`, `${BASE + 1}–${YN} 新增太陽能板，${eq(T.pv_new_total)}`],
                   [`${pct(P.farm + P.water)}`, "蓋在農地與魚塭、鹽田等水面：光電的主要用地議題是「農地」與「漁電」"],
-                  [`${fmt(P.tree)} 公頃（${pct(P.tree)}）`, `原本是樹林，${eq(P.tree)}；寬鬆定義也只有約 ${fmt(SENS.total.woody)} 公頃`],
+                  [`${fmt(P.tree)} 公頃（${pct(P.tree)}）`, `原本是樹林，${eq(P.tree)}；含先砍樹空窗多年再蓋、寬鬆定義，最多約 ${fmt(TMAX)} 公頃（< 6%）`],
                   ["局部而非全面", "砍樹光電集中在花蓮、屏東少數案場，多在平地；值得逐案檢視，但「全台大規模砍樹」不成立"]];
     for (let i = 0; i < 4; i++) {
       const y = 1.55 + i * 1.28;
