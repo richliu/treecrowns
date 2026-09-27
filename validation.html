@@ -1,0 +1,1673 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>驗證與圖資 - 台灣樹冠與太陽光電變遷</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="static/site.css" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%226%22 r=%225%22 fill=%22%23227832%22/%3E%3Crect x=%227%22 y=%2210%22 width=%222%22 height=%225%22 fill=%22%23654%22/%3E%3C/svg%3E">
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-md navbar-dark bg-success-subtle border-bottom" style="background:#1f4d2b!important">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-tree-fill"></i> 樹冠 × 光電 觀測</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        
+        <li class="nav-item"><a class="nav-link " href="index.html">總覽</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="about.html">成果說明</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="map.html">互動地圖</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="counties.html">縣市統計</a></li>
+        
+        <li class="nav-item"><a class="nav-link active fw-semibold" href="validation.html">驗證與圖資</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="method.html">方法與限制</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="data.html">資料下載</a></li>
+        
+      </ul>
+      <span class="navbar-text small text-light opacity-75">分析期間 2018–2025</span>
+    </div>
+  </div>
+</nav>
+<main class="flex-grow-1 container py-4">
+
+<h1 class="h4 fw-bold">驗證與圖資套疊（第二階段）</h1>
+<p class="small text-secondary">以政府開放資料檢驗衛星偵測結果，並把疑似光電案場套上地形、山坡地與國有林圖資。</p>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+    <div class="small text-secondary">能源署 電業級光電案場（2019–2024 取得施工許可）</div>
+    <div class="fs-4 fw-bold">419 案 / 6,685 公頃</div>
+    <div class="small text-muted">3,987 MW；每 MW 約 1.68 公頃土地</div>
+  </div></div></div>
+  <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+    <div class="small text-secondary">鄉鎮層級相關係數（案場土地面積 vs 本站偵測）</div>
+    <div class="fs-4 fw-bold">r = 0.792</div>
+    <div class="small text-muted">案場 ≥ 20 公頃的鄉鎮：偵測面積約為案場土地的 46%（面板只蓋部分土地）</div>
+  </div></div></div>
+  <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+    <div class="small text-secondary">新增光電案場位於山坡地（DEM 推估 ≥ 50% 面積）</div>
+    <div class="fs-4 fw-bold">394 處 / 225 公頃</div>
+    <div class="small text-muted">其中原為樹冠 18 公頃；平地原為樹冠 76 公頃</div>
+  </div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">全國：偵測光電面積 vs 能源署累計裝置容量</h2>
+    <div style="height:300px"><canvas id="cNat"></canvas></div>
+    <p class="small text-muted mt-2 mb-0">累計裝置容量含屋頂型；衛星 10 m 只能看到地面型與大型屋頂，因此面積成長應與「地面型」同步但低於總容量換算值。</p>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">鄉鎮：能源署電業級案場土地 vs 本站偵測新增光電（公頃）</h2>
+    <div style="height:300px"><canvas id="cTown"></canvas></div>
+    <p class="small text-muted mt-2 mb-0">每點一個鄉鎮。能源署清單只含取得施工許可的電業級（≥ 2 MW）案場，不含小型地面型與屋頂型；
+    偵測面積為太陽能板覆蓋像元，不含案場內的道路、空地。</p>
+  </div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body">
+  <h2 class="h6 fw-bold">新增光電的地形與國有林統計（2019–2025，公頃）</h2>
+  <table class="table table-sm small mb-0">
+    <thead><tr><th>位置</th><th class="text-end">案場數</th><th class="text-end">面積</th>
+      <th class="text-end"><span style="color:#1e90ff">■</span> 原為水體</th><th class="text-end"><span style="color:#f0be00">■</span> 原為農地/低植生</th><th class="text-end"><span style="color:#966e50">■</span> 原為裸露地/建物</th><th class="text-end"><span style="color:#dc003c">■</span> 原為樹冠</th></tr></thead>
+    <tbody>
+    
+      
+      <tr><td>山坡地（DEM 推估：標高 ≥ 100 m 或坡度 ≥ 5%，≥ 50% 面積）</td><td class="text-end">394</td><td class="text-end">225</td>
+        <td class="text-end">7.7</td><td class="text-end">125.8</td><td class="text-end">71.9</td><td class="text-end fw-bold text-danger">17.7</td></tr>
+    
+      
+      <tr><td>平地</td><td class="text-end">2632</td><td class="text-end">3,591</td>
+        <td class="text-end">1,191.7</td><td class="text-end">1,734.0</td><td class="text-end">570.0</td><td class="text-end fw-bold text-danger">76.4</td></tr>
+    
+      
+      <tr><td>國有林事業區內（≥ 50% 面積）</td><td class="text-end">20</td><td class="text-end">30</td>
+        <td class="text-end">0.0</td><td class="text-end">25.4</td><td class="text-end">1.9</td><td class="text-end fw-bold text-danger">1.5</td></tr>
+    
+    </tbody>
+  </table>
+  <p class="small text-muted mt-2 mb-0">山坡地法定定義為標高 100 公尺以上，或標高未滿 100 公尺而平均坡度 5% 以上；此處以 Copernicus DEM 30 m（地表模型，含樹高 / 建物）逐像元推估。
+  官方山坡地範圍圖（水保法）只有非六都可下載，已寫入每個案場屬性（slopeland_off）；國有林事業區使用林業保育署 114 年版。</p>
+</div></div>
+
+<div class="row g-4 mt-0">
+  <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">縣市：偵測新增光電 vs 同意備案容量（2019–2025）</h2>
+    <div class="table-responsive">
+    <table id="tC" class="table table-sm small">
+      <thead><tr><th>縣市</th><th>偵測新增（公頃）</th><th>同意備案 (MW)</th><th>每 MW 偵測面積（公頃）</th></tr></thead>
+      <tbody>
+        <tr><td>連江縣</td><td data-sort="0.0">0.0</td>
+          <td data-sort="0.5">0</td>
+          <td data-sort="0">0.0</td></tr>
+      
+        <tr><td>宜蘭縣</td><td data-sort="13.2">13.2</td>
+          <td data-sort="241.6">242</td>
+          <td data-sort="0.055">0.055</td></tr>
+      
+        <tr><td>彰化縣</td><td data-sort="753.9">753.9</td>
+          <td data-sort="2104.8">2,105</td>
+          <td data-sort="0.358">0.358</td></tr>
+      
+        <tr><td>南投縣</td><td data-sort="17.0">17.0</td>
+          <td data-sort="317.7">318</td>
+          <td data-sort="0.054">0.054</td></tr>
+      
+        <tr><td>雲林縣</td><td data-sort="380.2">380.2</td>
+          <td data-sort="1753.8">1,754</td>
+          <td data-sort="0.217">0.217</td></tr>
+      
+        <tr><td>基隆市</td><td data-sort="0.3">0.3</td>
+          <td data-sort="37.9">38</td>
+          <td data-sort="0.008">0.008</td></tr>
+      
+        <tr><td>臺北市</td><td data-sort="1.8">1.8</td>
+          <td data-sort="85.8">86</td>
+          <td data-sort="0.021">0.021</td></tr>
+      
+        <tr><td>新北市</td><td data-sort="19.4">19.4</td>
+          <td data-sort="258.0">258</td>
+          <td data-sort="0.075">0.075</td></tr>
+      
+        <tr><td>臺中市</td><td data-sort="94.4">94.4</td>
+          <td data-sort="905.1">905</td>
+          <td data-sort="0.104">0.104</td></tr>
+      
+        <tr><td>臺南市</td><td data-sort="1237.1">1,237.1</td>
+          <td data-sort="4181.4">4,181</td>
+          <td data-sort="0.296">0.296</td></tr>
+      
+        <tr><td>桃園市</td><td data-sort="122.4">122.4</td>
+          <td data-sort="892.9">893</td>
+          <td data-sort="0.137">0.137</td></tr>
+      
+        <tr><td>苗栗縣</td><td data-sort="42.4">42.4</td>
+          <td data-sort="528.5">528</td>
+          <td data-sort="0.08">0.08</td></tr>
+      
+        <tr><td>嘉義市</td><td data-sort="3.3">3.3</td>
+          <td data-sort="55.3">55</td>
+          <td data-sort="0.06">0.06</td></tr>
+      
+        <tr><td>嘉義縣</td><td data-sort="477.8">477.8</td>
+          <td data-sort="1663.4">1,663</td>
+          <td data-sort="0.287">0.287</td></tr>
+      
+        <tr><td>金門縣</td><td data-sort="2.3">2.3</td>
+          <td data-sort="32.6">33</td>
+          <td data-sort="0.071">0.071</td></tr>
+      
+        <tr><td>高雄市</td><td data-sort="315.4">315.4</td>
+          <td data-sort="1583.4">1,583</td>
+          <td data-sort="0.199">0.199</td></tr>
+      
+        <tr><td>臺東縣</td><td data-sort="16.1">16.1</td>
+          <td data-sort="101.9">102</td>
+          <td data-sort="0.158">0.158</td></tr>
+      
+        <tr><td>花蓮縣</td><td data-sort="66.0">66.0</td>
+          <td data-sort="254.4">254</td>
+          <td data-sort="0.259">0.259</td></tr>
+      
+        <tr><td>澎湖縣</td><td data-sort="0.5">0.5</td>
+          <td data-sort="77.4">77</td>
+          <td data-sort="0.006">0.006</td></tr>
+      
+        <tr><td>新竹市</td><td data-sort="4.1">4.1</td>
+          <td data-sort="54.7">55</td>
+          <td data-sort="0.075">0.075</td></tr>
+      
+        <tr><td>新竹縣</td><td data-sort="27.3">27.3</td>
+          <td data-sort="210.4">210</td>
+          <td data-sort="0.13">0.13</td></tr>
+      
+        <tr><td>屏東縣</td><td data-sort="271.3">271.3</td>
+          <td data-sort="1783.9">1,784</td>
+          <td data-sort="0.152">0.152</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small text-muted mb-0">同意備案容量含屋頂型與尚未完工案件。每 MW 偵測面積越低，代表該縣市以屋頂型 / 小型案場為主（衛星看不到），
+    或核准後尚未興建。</p>
+  </div></div></div>
+  <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">能源署電業級案場（依取得施工許可年）</h2>
+    <table class="table table-sm small mb-0">
+      <thead><tr><th>年</th><th class="text-end">案數</th><th class="text-end">土地（公頃）</th><th class="text-end">MW</th></tr></thead>
+      <tbody>
+        <tr><td>2019</td><td class="text-end">45</td><td class="text-end">666</td><td class="text-end">421</td></tr>
+      
+        <tr><td>2020</td><td class="text-end">97</td><td class="text-end">1,383</td><td class="text-end">863</td></tr>
+      
+        <tr><td>2021</td><td class="text-end">89</td><td class="text-end">1,970</td><td class="text-end">1,279</td></tr>
+      
+        <tr><td>2022</td><td class="text-end">131</td><td class="text-end">2,000</td><td class="text-end">983</td></tr>
+      
+        <tr><td>2023</td><td class="text-end">50</td><td class="text-end">505</td><td class="text-end">281</td></tr>
+      
+        <tr><td>2024</td><td class="text-end">7</td><td class="text-end">160</td><td class="text-end">160</td></tr>
+      </tbody>
+    </table>
+  </div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body">
+  <h2 class="h6 fw-bold">鄉鎮比對明細</h2>
+  <div class="table-responsive">
+  <table id="tT" class="table table-sm small">
+    <thead><tr><th>縣市</th><th>鄉鎮</th><th>電業級案數</th><th>案場土地（公頃）</th><th>MW</th><th>偵測新增（公頃）</th>
+      <th><span style="color:#1e90ff">■</span> 水體</th><th><span style="color:#f0be00">■</span> 農地/低植生</th><th><span style="color:#966e50">■</span> 裸露地/建物</th><th><span style="color:#dc003c">■</span> 樹冠</th></tr></thead>
+    <tbody>
+      <tr><td>臺南市</td><td>七股區</td><td data-sort="64">64</td>
+        <td data-sort="813.7">813.7</td><td data-sort="696.1">696.1</td>
+        <td data-sort="504.8" class="fw-semibold">504.8</td>
+        <td data-sort="191.5">191.5</td><td data-sort="259.4">259.4</td><td data-sort="52.3">52.3</td><td data-sort="1.6">1.6</td></tr>
+    
+      <tr><td>臺南市</td><td>北門區</td><td data-sort="10">10</td>
+        <td data-sort="686.4">686.4</td><td data-sort="174.7">174.7</td>
+        <td data-sort="186.0" class="fw-semibold">186.0</td>
+        <td data-sort="86.2">86.2</td><td data-sort="85.9">85.9</td><td data-sort="13.8">13.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>鹿港鎮</td><td data-sort="9">9</td>
+        <td data-sort="542.0">542.0</td><td data-sort="574.6">574.6</td>
+        <td data-sort="604.7" class="fw-semibold">604.7</td>
+        <td data-sort="479.5">479.5</td><td data-sort="38.2">38.2</td><td data-sort="86.9">86.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>斗六市</td><td data-sort="5">5</td>
+        <td data-sort="409.4">409.4</td><td data-sort="22.6">22.6</td>
+        <td data-sort="38.2" class="fw-semibold">38.2</td>
+        <td data-sort="0.4">0.4</td><td data-sort="22.4">22.4</td><td data-sort="14.8">14.8</td><td data-sort="0.6">0.6</td></tr>
+    
+      <tr><td>臺中市</td><td>龍井區</td><td data-sort="7">7</td>
+        <td data-sort="356.2">356.2</td><td data-sort="23.6">23.6</td>
+        <td data-sort="7.5" class="fw-semibold">7.5</td>
+        <td data-sort="0.2">0.2</td><td data-sort="3.4">3.4</td><td data-sort="3.9">3.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>枋寮鄉</td><td data-sort="19">19</td>
+        <td data-sort="345.1">345.1</td><td data-sort="189.3">189.3</td>
+        <td data-sort="40.3" class="fw-semibold">40.3</td>
+        <td data-sort="2.5">2.5</td><td data-sort="30.0">30.0</td><td data-sort="1.8">1.8</td><td data-sort="6.0">6.0</td></tr>
+    
+      <tr><td>高雄市</td><td>小港區</td><td data-sort="6">6</td>
+        <td data-sort="292.7">292.7</td><td data-sort="25.4">25.4</td>
+        <td data-sort="33.9" class="fw-semibold">33.9</td>
+        <td data-sort="3.1">3.1</td><td data-sort="19.4">19.4</td><td data-sort="11.4">11.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>臺西鄉</td><td data-sort="15">15</td>
+        <td data-sort="281.4">281.4</td><td data-sort="334.2">334.2</td>
+        <td data-sort="113.0" class="fw-semibold">113.0</td>
+        <td data-sort="10.5">10.5</td><td data-sort="95.3">95.3</td><td data-sort="7.2">7.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>義竹鄉</td><td data-sort="17">17</td>
+        <td data-sort="255.4">255.4</td><td data-sort="212.1">212.1</td>
+        <td data-sort="250.5" class="fw-semibold">250.5</td>
+        <td data-sort="75.9">75.9</td><td data-sort="154.2">154.2</td><td data-sort="20.5">20.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>布袋鎮</td><td data-sort="16">16</td>
+        <td data-sort="220.9">220.9</td><td data-sort="147.5">147.5</td>
+        <td data-sort="120.7" class="fw-semibold">120.7</td>
+        <td data-sort="43.4">43.4</td><td data-sort="62.6">62.6</td><td data-sort="14.8">14.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>口湖鄉</td><td data-sort="13">13</td>
+        <td data-sort="201.3">201.3</td><td data-sort="135.1">135.1</td>
+        <td data-sort="158.3" class="fw-semibold">158.3</td>
+        <td data-sort="9.3">9.3</td><td data-sort="141.9">141.9</td><td data-sort="6.7">6.7</td><td data-sort="0.4">0.4</td></tr>
+    
+      <tr><td>屏東縣</td><td>佳冬鄉</td><td data-sort="38">38</td>
+        <td data-sort="151.1">151.1</td><td data-sort="134.3">134.3</td>
+        <td data-sort="53.0" class="fw-semibold">53.0</td>
+        <td data-sort="4.2">4.2</td><td data-sort="39.0">39.0</td><td data-sort="1.7">1.7</td><td data-sort="8.1">8.1</td></tr>
+    
+      <tr><td>桃園市</td><td>觀音區</td><td data-sort="7">7</td>
+        <td data-sort="145.2">145.2</td><td data-sort="18.1">18.1</td>
+        <td data-sort="26.2" class="fw-semibold">26.2</td>
+        <td data-sort="5.8">5.8</td><td data-sort="11.8">11.8</td><td data-sort="7.6">7.6</td><td data-sort="1.0">1.0</td></tr>
+    
+      <tr><td>高雄市</td><td>彌陀區</td><td data-sort="3">3</td>
+        <td data-sort="121.9">121.9</td><td data-sort="78.5">78.5</td>
+        <td data-sort="52.0" class="fw-semibold">52.0</td>
+        <td data-sort="28.6">28.6</td><td data-sort="22.4">22.4</td><td data-sort="0.9">0.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>學甲區</td><td data-sort="9">9</td>
+        <td data-sort="107.5">107.5</td><td data-sort="96.1">96.1</td>
+        <td data-sort="117.7" class="fw-semibold">117.7</td>
+        <td data-sort="28.2">28.2</td><td data-sort="85.2">85.2</td><td data-sort="4.1">4.1</td><td data-sort="0.2">0.2</td></tr>
+    
+      <tr><td>臺南市</td><td>鹽水區</td><td data-sort="4">4</td>
+        <td data-sort="99.6">99.6</td><td data-sort="113.2">113.2</td>
+        <td data-sort="31.0" class="fw-semibold">31.0</td>
+        <td data-sort="2.4">2.4</td><td data-sort="26.4">26.4</td><td data-sort="2.1">2.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>官田區</td><td data-sort="2">2</td>
+        <td data-sort="92.0">92.0</td><td data-sort="33.1">33.1</td>
+        <td data-sort="30.0" class="fw-semibold">30.0</td>
+        <td data-sort="11.5">11.5</td><td data-sort="14.1">14.1</td><td data-sort="3.7">3.7</td><td data-sort="0.7">0.7</td></tr>
+    
+      <tr><td>苗栗縣</td><td>三義鄉</td><td data-sort="4">4</td>
+        <td data-sort="82.6">82.6</td><td data-sort="9.6">9.6</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="1.4">1.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>花蓮縣</td><td>鳳林鎮</td><td data-sort="1">1</td>
+        <td data-sort="66.0">66.0</td><td data-sort="75.0">75.0</td>
+        <td data-sort="38.8" class="fw-semibold">38.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.4">1.4</td><td data-sort="0.0">0.0</td><td data-sort="37.4">37.4</td></tr>
+    
+      <tr><td>彰化縣</td><td>二林鎮</td><td data-sort="1">1</td>
+        <td data-sort="64.0">64.0</td><td data-sort="32.6">32.6</td>
+        <td data-sort="40.8" class="fw-semibold">40.8</td>
+        <td data-sort="1.2">1.2</td><td data-sort="22.6">22.6</td><td data-sort="16.9">16.9</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>雲林縣</td><td>麥寮鄉</td><td data-sort="5">5</td>
+        <td data-sort="56.7">56.7</td><td data-sort="38.9">38.9</td>
+        <td data-sort="33.0" class="fw-semibold">33.0</td>
+        <td data-sort="10.0">10.0</td><td data-sort="18.5">18.5</td><td data-sort="4.5">4.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>獅子鄉</td><td data-sort="1">1</td>
+        <td data-sort="51.9">51.9</td><td data-sort="42.5">42.5</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td></tr>
+    
+      <tr><td>高雄市</td><td>大樹區</td><td data-sort="1">1</td>
+        <td data-sort="51.4">51.4</td><td data-sort="45.2">45.2</td>
+        <td data-sort="7.9" class="fw-semibold">7.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="5.0">5.0</td><td data-sort="1.2">1.2</td><td data-sort="1.7">1.7</td></tr>
+    
+      <tr><td>嘉義縣</td><td>布袋鄉</td><td data-sort="3">3</td>
+        <td data-sort="46.6">46.6</td><td data-sort="26.5">26.5</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>路竹區</td><td data-sort="4">4</td>
+        <td data-sort="44.0">44.0</td><td data-sort="23.3">23.3</td>
+        <td data-sort="38.3" class="fw-semibold">38.3</td>
+        <td data-sort="9.3">9.3</td><td data-sort="16.8">16.8</td><td data-sort="12.2">12.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>仁德區</td><td data-sort="1">1</td>
+        <td data-sort="42.5">42.5</td><td data-sort="5.5">5.5</td>
+        <td data-sort="8.0" class="fw-semibold">8.0</td>
+        <td data-sort="0.3">0.3</td><td data-sort="3.3">3.3</td><td data-sort="4.4">4.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>大城鄉</td><td data-sort="2">2</td>
+        <td data-sort="41.0">41.0</td><td data-sort="47.4">47.4</td>
+        <td data-sort="31.0" class="fw-semibold">31.0</td>
+        <td data-sort="9.9">9.9</td><td data-sort="19.1">19.1</td><td data-sort="2.0">2.0</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>嘉義縣</td><td>東石鄉</td><td data-sort="7">7</td>
+        <td data-sort="39.1">39.1</td><td data-sort="22.5">22.5</td>
+        <td data-sort="33.5" class="fw-semibold">33.5</td>
+        <td data-sort="2.2">2.2</td><td data-sort="29.8">29.8</td><td data-sort="1.5">1.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>高樹鄉</td><td data-sort="3">3</td>
+        <td data-sort="37.7">37.7</td><td data-sort="41.0">41.0</td>
+        <td data-sort="15.0" class="fw-semibold">15.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="12.3">12.3</td><td data-sort="2.2">2.2</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>澎湖縣</td><td>湖西鄉</td><td data-sort="5">5</td>
+        <td data-sort="37.6">37.6</td><td data-sort="30.2">30.2</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>善化區</td><td data-sort="4">4</td>
+        <td data-sort="35.6">35.6</td><td data-sort="15.8">15.8</td>
+        <td data-sort="14.4" class="fw-semibold">14.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="10.0">10.0</td><td data-sort="4.4">4.4</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>新竹縣</td><td>新豐鄉</td><td data-sort="3">3</td>
+        <td data-sort="33.5">33.5</td><td data-sort="6.7">6.7</td>
+        <td data-sort="10.4" class="fw-semibold">10.4</td>
+        <td data-sort="3.7">3.7</td><td data-sort="4.2">4.2</td><td data-sort="2.6">2.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>大林鎮</td><td data-sort="3">3</td>
+        <td data-sort="33.3">33.3</td><td data-sort="8.7">8.7</td>
+        <td data-sort="22.4" class="fw-semibold">22.4</td>
+        <td data-sort="0.4">0.4</td><td data-sort="13.5">13.5</td><td data-sort="6.2">6.2</td><td data-sort="2.4">2.4</td></tr>
+    
+      <tr><td>屏東縣</td><td>林邊鄉</td><td data-sort="5">5</td>
+        <td data-sort="32.2">32.2</td><td data-sort="29.3">29.3</td>
+        <td data-sort="44.6" class="fw-semibold">44.6</td>
+        <td data-sort="17.9">17.9</td><td data-sort="23.2">23.2</td><td data-sort="0.6">0.6</td><td data-sort="2.8">2.8</td></tr>
+    
+      <tr><td>高雄市</td><td>永安區</td><td data-sort="4">4</td>
+        <td data-sort="31.8">31.8</td><td data-sort="14.8">14.8</td>
+        <td data-sort="27.7" class="fw-semibold">27.7</td>
+        <td data-sort="12.5">12.5</td><td data-sort="11.3">11.3</td><td data-sort="3.9">3.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>桃園區</td><td data-sort="3">3</td>
+        <td data-sort="30.7">30.7</td><td data-sort="2.7">2.7</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.5">0.5</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>潮洲鎮</td><td data-sort="1">1</td>
+        <td data-sort="30.2">30.2</td><td data-sort="3.1">3.1</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>鳳山區</td><td data-sort="1">1</td>
+        <td data-sort="29.9">29.9</td><td data-sort="3.2">3.2</td>
+        <td data-sort="3.1" class="fw-semibold">3.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.4">1.4</td><td data-sort="1.7">1.7</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>大園區</td><td data-sort="3">3</td>
+        <td data-sort="27.8">27.8</td><td data-sort="6.7">6.7</td>
+        <td data-sort="20.1" class="fw-semibold">20.1</td>
+        <td data-sort="6.9">6.9</td><td data-sort="7.4">7.4</td><td data-sort="5.6">5.6</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>彰化縣</td><td>芳苑鄉</td><td data-sort="5">5</td>
+        <td data-sort="27.1">27.1</td><td data-sort="13.6">13.6</td>
+        <td data-sort="19.1" class="fw-semibold">19.1</td>
+        <td data-sort="2.8">2.8</td><td data-sort="10.1">10.1</td><td data-sort="5.7">5.7</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>雲林縣</td><td>古坑鄉</td><td data-sort="1">1</td>
+        <td data-sort="26.5">26.5</td><td data-sort="29.4">29.4</td>
+        <td data-sort="4.4" class="fw-semibold">4.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="3.2">3.2</td><td data-sort="0.4">0.4</td><td data-sort="0.8">0.8</td></tr>
+    
+      <tr><td>苗栗縣</td><td>西湖鄉</td><td data-sort="1">1</td>
+        <td data-sort="25.0">25.0</td><td data-sort="7.0">7.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.2">0.2</td><td data-sort="0.2">0.2</td></tr>
+    
+      <tr><td>臺南市</td><td>安南區</td><td data-sort="2">2</td>
+        <td data-sort="23.6">23.6</td><td data-sort="3.4">3.4</td>
+        <td data-sort="39.1" class="fw-semibold">39.1</td>
+        <td data-sort="2.7">2.7</td><td data-sort="21.2">21.2</td><td data-sort="15.2">15.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>麻豆區</td><td data-sort="6">6</td>
+        <td data-sort="20.7">20.7</td><td data-sort="28.6">28.6</td>
+        <td data-sort="20.8" class="fw-semibold">20.8</td>
+        <td data-sort="3.1">3.1</td><td data-sort="16.2">16.2</td><td data-sort="1.6">1.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>沙鹿區</td><td data-sort="1">1</td>
+        <td data-sort="20.7">20.7</td><td data-sort="5.6">5.6</td>
+        <td data-sort="4.4" class="fw-semibold">4.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="3.8">3.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>山上區</td><td data-sort="9">9</td>
+        <td data-sort="20.4">20.4</td><td data-sort="24.9">24.9</td>
+        <td data-sort="6.6" class="fw-semibold">6.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.9">4.9</td><td data-sort="1.4">1.4</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>新北市</td><td>板橋區</td><td data-sort="1">1</td>
+        <td data-sort="20.2">20.2</td><td data-sort="5.0">5.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>楊梅區</td><td data-sort="2">2</td>
+        <td data-sort="20.2">20.2</td><td data-sort="1.5">1.5</td>
+        <td data-sort="22.9" class="fw-semibold">22.9</td>
+        <td data-sort="0.4">0.4</td><td data-sort="9.2">9.2</td><td data-sort="13.0">13.0</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>臺中市</td><td>北屯區</td><td data-sort="1">1</td>
+        <td data-sort="19.0">19.0</td><td data-sort="2.9">2.9</td>
+        <td data-sort="1.6" class="fw-semibold">1.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.6">1.6</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>新園鄉</td><td data-sort="1">1</td>
+        <td data-sort="18.4">18.4</td><td data-sort="3.5">3.5</td>
+        <td data-sort="6.2" class="fw-semibold">6.2</td>
+        <td data-sort="0.3">0.3</td><td data-sort="5.4">5.4</td><td data-sort="0.5">0.5</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>嘉義縣</td><td>鹿草鄉</td><td data-sort="2">2</td>
+        <td data-sort="18.3">18.3</td><td data-sort="7.8">7.8</td>
+        <td data-sort="13.5" class="fw-semibold">13.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="5.8">5.8</td><td data-sort="7.7">7.7</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>後龍鎮</td><td data-sort="1">1</td>
+        <td data-sort="16.9">16.9</td><td data-sort="9.6">9.6</td>
+        <td data-sort="9.3" class="fw-semibold">9.3</td>
+        <td data-sort="7.8">7.8</td><td data-sort="1.6">1.6</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>四湖鄉</td><td data-sort="4">4</td>
+        <td data-sort="16.3">16.3</td><td data-sort="22.2">22.2</td>
+        <td data-sort="4.9" class="fw-semibold">4.9</td>
+        <td data-sort="0.2">0.2</td><td data-sort="3.5">3.5</td><td data-sort="1.2">1.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>五結鄉</td><td data-sort="2">2</td>
+        <td data-sort="14.1">14.1</td><td data-sort="11.5">11.5</td>
+        <td data-sort="3.8" class="fw-semibold">3.8</td>
+        <td data-sort="0.1">0.1</td><td data-sort="2.3">2.3</td><td data-sort="1.5">1.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>岡山區</td><td data-sort="3">3</td>
+        <td data-sort="14.1">14.1</td><td data-sort="6.3">6.3</td>
+        <td data-sort="29.9" class="fw-semibold">29.9</td>
+        <td data-sort="6.3">6.3</td><td data-sort="12.4">12.4</td><td data-sort="11.2">11.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>南投市</td><td data-sort="1">1</td>
+        <td data-sort="14.0">14.0</td><td data-sort="3.3">3.3</td>
+        <td data-sort="3.9" class="fw-semibold">3.9</td>
+        <td data-sort="0.1">0.1</td><td data-sort="2.5">2.5</td><td data-sort="1.3">1.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>花蓮縣</td><td>花蓮市</td><td data-sort="2">2</td>
+        <td data-sort="13.3">13.3</td><td data-sort="2.9">2.9</td>
+        <td data-sort="4.0" class="fw-semibold">4.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.2">2.2</td><td data-sort="1.8">1.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>梧棲區</td><td data-sort="2">2</td>
+        <td data-sort="12.8">12.8</td><td data-sort="5.3">5.3</td>
+        <td data-sort="16.4" class="fw-semibold">16.4</td>
+        <td data-sort="0.7">0.7</td><td data-sort="6.1">6.1</td><td data-sort="9.6">9.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>中埔鄉</td><td data-sort="1">1</td>
+        <td data-sort="12.5">12.5</td><td data-sort="4.4">4.4</td>
+        <td data-sort="4.4" class="fw-semibold">4.4</td>
+        <td data-sort="0.8">0.8</td><td data-sort="2.6">2.6</td><td data-sort="1.0">1.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>林內鄉</td><td data-sort="2">2</td>
+        <td data-sort="11.6">11.6</td><td data-sort="4.5">4.5</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>林邊鎮</td><td data-sort="1">1</td>
+        <td data-sort="11.5">11.5</td><td data-sort="11.7">11.7</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>楠梓區</td><td data-sort="1">1</td>
+        <td data-sort="10.7">10.7</td><td data-sort="3.9">3.9</td>
+        <td data-sort="4.5" class="fw-semibold">4.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="3.3">3.3</td><td data-sort="1.2">1.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>八里區</td><td data-sort="2">2</td>
+        <td data-sort="10.1">10.1</td><td data-sort="7.0">7.0</td>
+        <td data-sort="1.7" class="fw-semibold">1.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>蘆洲區</td><td data-sort="1">1</td>
+        <td data-sort="9.9">9.9</td><td data-sort="3.0">3.0</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>鶯歌區</td><td data-sort="1">1</td>
+        <td data-sort="9.7">9.7</td><td data-sort="1.9">1.9</td>
+        <td data-sort="2.0" class="fw-semibold">2.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td><td data-sort="0.9">0.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>橋頭區</td><td data-sort="1">1</td>
+        <td data-sort="9.5">9.5</td><td data-sort="4.1">4.1</td>
+        <td data-sort="4.9" class="fw-semibold">4.9</td>
+        <td data-sort="2.5">2.5</td><td data-sort="1.6">1.6</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>崁頂鄉</td><td data-sort="1">1</td>
+        <td data-sort="8.6">8.6</td><td data-sort="3.7">3.7</td>
+        <td data-sort="5.0" class="fw-semibold">5.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="3.6">3.6</td><td data-sort="0.9">0.9</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>苗栗縣</td><td>銅鑼鄉</td><td data-sort="1">1</td>
+        <td data-sort="8.3">8.3</td><td data-sort="7.2">7.2</td>
+        <td data-sort="4.4" class="fw-semibold">4.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.6">2.6</td><td data-sort="1.8">1.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>東港鎮</td><td data-sort="1">1</td>
+        <td data-sort="8.3">8.3</td><td data-sort="3.8">3.8</td>
+        <td data-sort="7.1" class="fw-semibold">7.1</td>
+        <td data-sort="3.4">3.4</td><td data-sort="2.9">2.9</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>新營區</td><td data-sort="4">4</td>
+        <td data-sort="7.9">7.9</td><td data-sort="2.7">2.7</td>
+        <td data-sort="4.7" class="fw-semibold">4.7</td>
+        <td data-sort="0.1">0.1</td><td data-sort="3.8">3.8</td><td data-sort="0.7">0.7</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>燕巢區</td><td data-sort="1">1</td>
+        <td data-sort="7.3">7.3</td><td data-sort="4.3">4.3</td>
+        <td data-sort="13.2" class="fw-semibold">13.2</td>
+        <td data-sort="7.0">7.0</td><td data-sort="2.2">2.2</td><td data-sort="4.0">4.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>基隆市</td><td>七堵區</td><td data-sort="1">1</td>
+        <td data-sort="7.3">7.3</td><td data-sort="2.0">2.0</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東鎮</td><td>林邊鄉</td><td data-sort="1">1</td>
+        <td data-sort="6.9">6.9</td><td data-sort="6.9">6.9</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>永康區</td><td data-sort="2">2</td>
+        <td data-sort="6.6">6.6</td><td data-sort="2.2">2.2</td>
+        <td data-sort="15.6" class="fw-semibold">15.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="11.8">11.8</td><td data-sort="3.7">3.7</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>新北市</td><td>新莊區</td><td data-sort="1">1</td>
+        <td data-sort="6.5">6.5</td><td data-sort="3.6">3.6</td>
+        <td data-sort="2.1" class="fw-semibold">2.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.3">1.3</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>三峽區</td><td data-sort="1">1</td>
+        <td data-sort="6.1">6.1</td><td data-sort="2.3">2.3</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.1">0.1</td><td data-sort="0.6">0.6</td></tr>
+    
+      <tr><td>桃園縣</td><td>大溪區</td><td data-sort="1">1</td>
+        <td data-sort="5.9">5.9</td><td data-sort="1.0">1.0</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>新市區</td><td data-sort="1">1</td>
+        <td data-sort="5.9">5.9</td><td data-sort="0.7">0.7</td>
+        <td data-sort="36.8" class="fw-semibold">36.8</td>
+        <td data-sort="3.2">3.2</td><td data-sort="17.0">17.0</td><td data-sort="16.6">16.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺東縣</td><td>臺東市</td><td data-sort="1">1</td>
+        <td data-sort="5.7">5.7</td><td data-sort="5.0">5.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>中壢區</td><td data-sort="1">1</td>
+        <td data-sort="5.7">5.7</td><td data-sort="1.1">1.1</td>
+        <td data-sort="7.9" class="fw-semibold">7.9</td>
+        <td data-sort="0.1">0.1</td><td data-sort="5.2">5.2</td><td data-sort="2.6">2.6</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>彰化縣</td><td>線西鄉</td><td data-sort="2">2</td>
+        <td data-sort="5.5">5.5</td><td data-sort="2.7">2.7</td>
+        <td data-sort="21.8" class="fw-semibold">21.8</td>
+        <td data-sort="0.7">0.7</td><td data-sort="8.7">8.7</td><td data-sort="12.4">12.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>關廟區</td><td data-sort="1">1</td>
+        <td data-sort="5.5">5.5</td><td data-sort="0.5">0.5</td>
+        <td data-sort="5.7" class="fw-semibold">5.7</td>
+        <td data-sort="0.6">0.6</td><td data-sort="2.4">2.4</td><td data-sort="2.7">2.7</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺北市</td><td>大安區</td><td data-sort="1">1</td>
+        <td data-sort="5.3">5.3</td><td data-sort="2.1">2.1</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>中西區</td><td data-sort="1">1</td>
+        <td data-sort="5.1">5.1</td><td data-sort="0.5">0.5</td>
+        <td data-sort="0.1" class="fw-semibold">0.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>連江縣</td><td>南竿鄉</td><td data-sort="1">1</td>
+        <td data-sort="4.8">4.8</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>茄萣區</td><td data-sort="1">1</td>
+        <td data-sort="4.7">4.7</td><td data-sort="2.4">2.4</td>
+        <td data-sort="12.2" class="fw-semibold">12.2</td>
+        <td data-sort="3.4">3.4</td><td data-sort="7.0">7.0</td><td data-sort="1.8">1.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>湖內區</td><td data-sort="1">1</td>
+        <td data-sort="4.4">4.4</td><td data-sort="3.1">3.1</td>
+        <td data-sort="15.5" class="fw-semibold">15.5</td>
+        <td data-sort="5.1">5.1</td><td data-sort="9.3">9.3</td><td data-sort="1.1">1.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>三星鄉</td><td data-sort="1">1</td>
+        <td data-sort="3.0">3.0</td><td data-sort="3.6">3.6</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>永靖鄉</td><td data-sort="1">1</td>
+        <td data-sort="2.9">2.9</td><td data-sort="3.1">3.1</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>內埔鄉</td><td data-sort="2">2</td>
+        <td data-sort="2.8">2.8</td><td data-sort="2.1">2.1</td>
+        <td data-sort="6.4" class="fw-semibold">6.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.8">4.8</td><td data-sort="1.0">1.0</td><td data-sort="0.6">0.6</td></tr>
+    
+      <tr><td>高雄市</td><td>三民區</td><td data-sort="1">1</td>
+        <td data-sort="2.7">2.7</td><td data-sort="0.3">0.3</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>長治鄉</td><td data-sort="2">2</td>
+        <td data-sort="2.4">2.4</td><td data-sort="2.4">2.4</td>
+        <td data-sort="6.6" class="fw-semibold">6.6</td>
+        <td data-sort="0.1">0.1</td><td data-sort="4.2">4.2</td><td data-sort="1.6">1.6</td><td data-sort="0.8">0.8</td></tr>
+    
+      <tr><td>嘉義鄉</td><td>布袋鎮</td><td data-sort="1">1</td>
+        <td data-sort="2.0">2.0</td><td data-sort="2.4">2.4</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>車城鄉</td><td data-sort="1">1</td>
+        <td data-sort="2.0">2.0</td><td data-sort="2.4">2.4</td>
+        <td data-sort="7.5" class="fw-semibold">7.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.2">1.2</td><td data-sort="0.3">0.3</td><td data-sort="6.0">6.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>鹽埔鄉</td><td data-sort="1">1</td>
+        <td data-sort="1.9">1.9</td><td data-sort="1.9">1.9</td>
+        <td data-sort="9.9" class="fw-semibold">9.9</td>
+        <td data-sort="0.1">0.1</td><td data-sort="7.0">7.0</td><td data-sort="2.6">2.6</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>屏東縣</td><td>里港鄉</td><td data-sort="1">1</td>
+        <td data-sort="1.8">1.8</td><td data-sort="1.8">1.8</td>
+        <td data-sort="8.7" class="fw-semibold">8.7</td>
+        <td data-sort="0.5">0.5</td><td data-sort="7.3">7.3</td><td data-sort="0.5">0.5</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>屏東縣</td><td>恆春鎮</td><td data-sort="1">1</td>
+        <td data-sort="1.8">1.8</td><td data-sort="2.1">2.1</td>
+        <td data-sort="11.1" class="fw-semibold">11.1</td>
+        <td data-sort="0.4">0.4</td><td data-sort="4.1">4.1</td><td data-sort="0.9">0.9</td><td data-sort="5.7">5.7</td></tr>
+    
+      <tr><td>臺中市</td><td>后里區</td><td data-sort="1">1</td>
+        <td data-sort="1.8">1.8</td><td data-sort="2.0">2.0</td>
+        <td data-sort="10.5" class="fw-semibold">10.5</td>
+        <td data-sort="0.1">0.1</td><td data-sort="4.6">4.6</td><td data-sort="5.6">5.6</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>屏東縣</td><td>新埤鄉</td><td data-sort="1">1</td>
+        <td data-sort="1.7">1.7</td><td data-sort="1.9">1.9</td>
+        <td data-sort="6.3" class="fw-semibold">6.3</td>
+        <td data-sort="0.1">0.1</td><td data-sort="5.7">5.7</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>水里鄉</td><td data-sort="1">1</td>
+        <td data-sort="1.6">1.6</td><td data-sort="1.0">1.0</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>下營區</td><td data-sort="1">1</td>
+        <td data-sort="1.5">1.5</td><td data-sort="1.5">1.5</td>
+        <td data-sort="2.2" class="fw-semibold">2.2</td>
+        <td data-sort="0.6">0.6</td><td data-sort="1.5">1.5</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>白河區</td><td data-sort="1">1</td>
+        <td data-sort="1.4">1.4</td><td data-sort="0.9">0.9</td>
+        <td data-sort="3.9" class="fw-semibold">3.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.9">2.9</td><td data-sort="0.8">0.8</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>臺南市</td><td>柳營區</td><td data-sort="1">1</td>
+        <td data-sort="1.3">1.3</td><td data-sort="1.0">1.0</td>
+        <td data-sort="10.1" class="fw-semibold">10.1</td>
+        <td data-sort="0.1">0.1</td><td data-sort="7.8">7.8</td><td data-sort="2.0">2.0</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>彰化縣</td><td>溪州鄉</td><td data-sort="1">1</td>
+        <td data-sort="1.3">1.3</td><td data-sort="2.8">2.8</td>
+        <td data-sort="5.8" class="fw-semibold">5.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.0">4.0</td><td data-sort="1.0">1.0</td><td data-sort="0.7">0.7</td></tr>
+    
+      <tr><td>臺中市</td><td>大甲區</td><td data-sort="1">1</td>
+        <td data-sort="1.1">1.1</td><td data-sort="0.7">0.7</td>
+        <td data-sort="2.0" class="fw-semibold">2.0</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.8">0.8</td><td data-sort="1.2">1.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>後壁區</td><td data-sort="1">1</td>
+        <td data-sort="0.8">0.8</td><td data-sort="0.9">0.9</td>
+        <td data-sort="3.0" class="fw-semibold">3.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.6">2.6</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>金門縣</td><td>金城鎮</td><td data-sort="1">1</td>
+        <td data-sort="0.6">0.6</td><td data-sort="0.2">0.2</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>金門縣</td><td>金湖鎮</td><td data-sort="1">1</td>
+        <td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>將軍區</td><td data-sort="1">1</td>
+        <td data-sort="0.1">0.1</td><td data-sort="120.0">120.0</td>
+        <td data-sort="148.7" class="fw-semibold">148.7</td>
+        <td data-sort="54.8">54.8</td><td data-sort="63.6">63.6</td><td data-sort="30.4">30.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>萬丹鄉</td><td data-sort="2">2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.8" class="fw-semibold">1.8</td>
+        <td data-sort="0.5">0.5</td><td data-sort="1.1">1.1</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>安定區</td><td data-sort="1">1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="6.4" class="fw-semibold">6.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.9">4.9</td><td data-sort="1.5">1.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>公館鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.5" class="fw-semibold">0.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>臺南市</td><td>楠西區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>大寮區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="20.5" class="fw-semibold">20.5</td>
+        <td data-sort="0.3">0.3</td><td data-sort="6.2">6.2</td><td data-sort="14.0">14.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>東區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.8" class="fw-semibold">0.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>東山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.6" class="fw-semibold">0.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td></tr>
+    
+      <tr><td>高雄市</td><td>前鎮區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="10.8" class="fw-semibold">10.8</td>
+        <td data-sort="0.3">0.3</td><td data-sort="5.3">5.3</td><td data-sort="5.3">5.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>仁武區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="8.3" class="fw-semibold">8.3</td>
+        <td data-sort="2.3">2.3</td><td data-sort="3.7">3.7</td><td data-sort="2.3">2.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>新化區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.6" class="fw-semibold">3.6</td>
+        <td data-sort="2.6">2.6</td><td data-sort="0.7">0.7</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>西螺鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.3" class="fw-semibold">2.3</td>
+        <td data-sort="0.6">0.6</td><td data-sort="1.2">1.2</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>歸仁區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="8.9" class="fw-semibold">8.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="5.6">5.6</td><td data-sort="3.3">3.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>褒忠鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.9" class="fw-semibold">0.9</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.1">0.1</td><td data-sort="0.2">0.2</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>臺南市</td><td>玉井區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.1" class="fw-semibold">0.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>虎尾鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="7.7" class="fw-semibold">7.7</td>
+        <td data-sort="1.0">1.0</td><td data-sort="4.6">4.6</td><td data-sort="1.9">1.9</td><td data-sort="0.2">0.2</td></tr>
+    
+      <tr><td>高雄市</td><td>大社區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.9" class="fw-semibold">1.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.6">1.6</td><td data-sort="0.2">0.2</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>高雄市</td><td>旗山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.5" class="fw-semibold">0.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>左營區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="14.8" class="fw-semibold">14.8</td>
+        <td data-sort="0.2">0.2</td><td data-sort="7.5">7.5</td><td data-sort="7.1">7.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>左鎮區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.1" class="fw-semibold">2.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.7">1.7</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>旗津區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.9" class="fw-semibold">0.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.9">0.9</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>林園區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.8" class="fw-semibold">1.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.2">1.2</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>桃源區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>梓官區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.6" class="fw-semibold">0.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>美濃區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>高雄市</td><td>苓雅區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.4" class="fw-semibold">1.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>阿蓮區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.2" class="fw-semibold">4.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="3.8">3.8</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>安平區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.6" class="fw-semibold">3.6</td>
+        <td data-sort="0.3">0.3</td><td data-sort="2.0">2.0</td><td data-sort="1.2">1.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>鳥松區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.8" class="fw-semibold">1.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.4">1.4</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>鹽埕區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.5" class="fw-semibold">0.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>西港區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>莿桐鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.4" class="fw-semibold">2.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.7">1.7</td><td data-sort="0.6">0.6</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>苗栗縣</td><td>竹南鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="11.0" class="fw-semibold">11.0</td>
+        <td data-sort="0.2">0.2</td><td data-sort="7.6">7.6</td><td data-sort="3.1">3.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>頭屋鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>三灣鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.2" class="fw-semibold">1.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.4">0.4</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>苗栗縣</td><td>苑裡鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.2" class="fw-semibold">1.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>苗栗市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.9">0.9</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>通霄鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="6.6" class="fw-semibold">6.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.2">4.2</td><td data-sort="1.7">1.7</td><td data-sort="0.7">0.7</td></tr>
+    
+      <tr><td>花蓮縣</td><td>秀林鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="18.8" class="fw-semibold">18.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="17.9">17.9</td><td data-sort="0.7">0.7</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>花蓮縣</td><td>瑞穗鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>花蓮縣</td><td>玉里鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.9" class="fw-semibold">0.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>造橋鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.0" class="fw-semibold">2.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.4">1.4</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>花蓮縣</td><td>新城鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>苗栗縣</td><td>頭份市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.4" class="fw-semibold">2.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.0">2.0</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>花蓮縣</td><td>壽豐鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>花蓮縣</td><td>吉安鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.7">0.7</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>花蓮縣</td><td>光復鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.8" class="fw-semibold">0.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>金門縣</td><td>金寧鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>水林鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.2" class="fw-semibold">4.2</td>
+        <td data-sort="0.2">0.2</td><td data-sort="3.4">3.4</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺東縣</td><td>長濱鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>二崙鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>元長鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.9" class="fw-semibold">1.9</td>
+        <td data-sort="0.2">0.2</td><td data-sort="1.4">1.4</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺東縣</td><td>海端鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="12.6" class="fw-semibold">12.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="9.9">9.9</td><td data-sort="1.1">1.1</td><td data-sort="1.5">1.5</td></tr>
+    
+      <tr><td>雲林縣</td><td>北港鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.7">0.7</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>土庫鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺東縣</td><td>池上鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.1">0.1</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>臺東縣</td><td>延平鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>雲林縣</td><td>大埤鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.2" class="fw-semibold">2.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="1.3">1.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺東縣</td><td>卑南鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.5" class="fw-semibold">0.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td></tr>
+    
+      <tr><td>雲林縣</td><td>崙背鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.7" class="fw-semibold">1.7</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.2">1.2</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>斗南鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>雲林縣</td><td>東勢鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.6" class="fw-semibold">0.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>中寮鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td></tr>
+    
+      <tr><td>臺中市</td><td>大安區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.2" class="fw-semibold">1.2</td>
+        <td data-sort="0.4">0.4</td><td data-sort="0.9">0.9</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>大內區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.9" class="fw-semibold">0.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td></tr>
+    
+      <tr><td>彰化縣</td><td>竹塘鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.4" class="fw-semibold">2.4</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.9">0.9</td><td data-sort="0.1">0.1</td><td data-sort="1.2">1.2</td></tr>
+    
+      <tr><td>屏東縣</td><td>九如鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="5.9" class="fw-semibold">5.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.2">4.2</td><td data-sort="1.6">1.6</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>屏東縣</td><td>南州鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.9" class="fw-semibold">0.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>屏東縣</td><td>屏東市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="19.5" class="fw-semibold">19.5</td>
+        <td data-sort="1.7">1.7</td><td data-sort="8.8">8.8</td><td data-sort="8.8">8.8</td><td data-sort="0.3">0.3</td></tr>
+    
+      <tr><td>屏東縣</td><td>枋山鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.8">0.8</td><td data-sort="0.1">0.1</td><td data-sort="0.2">0.2</td></tr>
+    
+      <tr><td>屏東縣</td><td>潮州鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="7.1" class="fw-semibold">7.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="5.6">5.6</td><td data-sort="1.3">1.3</td><td data-sort="0.2">0.2</td></tr>
+    
+      <tr><td>屏東縣</td><td>竹田鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.1" class="fw-semibold">2.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.5">1.5</td><td data-sort="0.1">0.1</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>屏東縣</td><td>萬巒鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.0" class="fw-semibold">3.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.5">2.5</td><td data-sort="0.4">0.4</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>屏東縣</td><td>麟洛鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.2">0.2</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>彰化縣</td><td>二水鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>伸港鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="6.5" class="fw-semibold">6.5</td>
+        <td data-sort="0.7">0.7</td><td data-sort="2.5">2.5</td><td data-sort="3.3">3.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>北斗鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>和美鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.4">0.4</td><td data-sort="0.6">0.6</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>員林市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>埔心鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.6" class="fw-semibold">1.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.2">1.2</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>埔鹽鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>埤頭鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.1" class="fw-semibold">2.1</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.4">1.4</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>大村鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>彰化市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.4" class="fw-semibold">2.4</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.8">0.8</td><td data-sort="1.3">1.3</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>彰化縣</td><td>溪湖鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.4" class="fw-semibold">2.4</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.5">1.5</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>田中鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>田尾鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.9">0.9</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>社頭鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>福興鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.6" class="fw-semibold">4.6</td>
+        <td data-sort="1.1">1.1</td><td data-sort="2.2">2.2</td><td data-sort="1.3">1.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>蘇澳鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.7" class="fw-semibold">2.7</td>
+        <td data-sort="0.3">0.3</td><td data-sort="1.4">1.4</td><td data-sort="0.9">0.9</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>礁溪鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>宜蘭市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.2" class="fw-semibold">1.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>大埔鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>南投縣</td><td>名間鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.4" class="fw-semibold">2.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td><td data-sort="1.4">1.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>國姓鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.5" class="fw-semibold">0.5</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.2">0.2</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>埔里鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.9">0.9</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>竹山鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.6" class="fw-semibold">3.6</td>
+        <td data-sort="0.3">0.3</td><td data-sort="2.7">2.7</td><td data-sort="0.5">0.5</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>南投縣</td><td>草屯鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.6" class="fw-semibold">1.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.0">1.0</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>集集鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.6" class="fw-semibold">0.6</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>南投縣</td><td>魚池鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.2" class="fw-semibold">2.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.9">1.9</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義市</td><td>東區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.8" class="fw-semibold">1.8</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.4">1.4</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義市</td><td>西區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.9">0.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>六腳鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.7">0.7</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>太保市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="7.7" class="fw-semibold">7.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="3.6">3.6</td><td data-sort="4.0">4.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>壯圍鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>新港鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="13.0" class="fw-semibold">13.0</td>
+        <td data-sort="0.4">0.4</td><td data-sort="4.6">4.6</td><td data-sort="8.0">8.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>朴子市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.2" class="fw-semibold">1.2</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.9">0.9</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>梅山鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.8" class="fw-semibold">1.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.6">1.6</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>民雄鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.3" class="fw-semibold">4.3</td>
+        <td data-sort="0.1">0.1</td><td data-sort="2.3">2.3</td><td data-sort="1.9">1.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>水上鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.5" class="fw-semibold">2.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.3">1.3</td><td data-sort="1.2">1.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>溪口鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>嘉義縣</td><td>竹崎鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.0">1.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>基隆市</td><td>安樂區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>冬山鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.9" class="fw-semibold">2.9</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.1">1.1</td><td data-sort="1.7">1.7</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>宜蘭縣</td><td>員山鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.6" class="fw-semibold">1.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.1">0.1</td><td data-sort="1.1">1.1</td></tr>
+    
+      <tr><td>彰化縣</td><td>秀水鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.7">0.7</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>彰化縣</td><td>花壇鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.6" class="fw-semibold">0.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>南區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="12.5" class="fw-semibold">12.5</td>
+        <td data-sort="6.9">6.9</td><td data-sort="3.7">3.7</td><td data-sort="1.9">1.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>三重區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.9">0.9</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>南區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>南屯區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="6.2" class="fw-semibold">6.2</td>
+        <td data-sort="1.0">1.0</td><td data-sort="2.3">2.3</td><td data-sort="3.0">3.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>外埔區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.6" class="fw-semibold">3.6</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.4">1.4</td><td data-sort="2.1">2.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>大肚區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.9" class="fw-semibold">4.9</td>
+        <td data-sort="0.1">0.1</td><td data-sort="2.5">2.5</td><td data-sort="2.4">2.4</td><td data-sort="0.1">0.1</td></tr>
+    
+      <tr><td>臺中市</td><td>大里區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.8" class="fw-semibold">0.8</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>大雅區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.8" class="fw-semibold">2.8</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.1">1.1</td><td data-sort="1.6">1.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>太平區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.1" class="fw-semibold">2.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.8">1.8</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>新社區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.8" class="fw-semibold">2.8</td>
+        <td data-sort="0.2">0.2</td><td data-sort="1.0">1.0</td><td data-sort="1.5">1.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>東區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.3" class="fw-semibold">1.3</td>
+        <td data-sort="0.6">0.6</td><td data-sort="0.3">0.3</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>清水區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="6.7" class="fw-semibold">6.7</td>
+        <td data-sort="0.7">0.7</td><td data-sort="3.6">3.6</td><td data-sort="2.4">2.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>潭子區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.8" class="fw-semibold">1.8</td>
+        <td data-sort="0.1">0.1</td><td data-sort="1.1">1.1</td><td data-sort="0.6">0.6</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>烏日區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.2" class="fw-semibold">2.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.0">2.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>石岡區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>神岡區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.2" class="fw-semibold">3.2</td>
+        <td data-sort="0.3">0.3</td><td data-sort="1.6">1.6</td><td data-sort="1.3">1.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>西屯區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="7.7" class="fw-semibold">7.7</td>
+        <td data-sort="0.5">0.5</td><td data-sort="3.2">3.2</td><td data-sort="4.0">4.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>豐原區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.2" class="fw-semibold">1.2</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.6">0.6</td><td data-sort="0.5">0.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺中市</td><td>霧峰區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.7" class="fw-semibold">2.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.4">1.4</td><td data-sort="1.3">1.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺北市</td><td>中山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺北市</td><td>內湖區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺北市</td><td>南港區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.8">0.8</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>佳里區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.8" class="fw-semibold">4.8</td>
+        <td data-sort="1.4">1.4</td><td data-sort="2.9">2.9</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>六甲區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.0">1.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>臺南市</td><td>南化區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>澎湖縣</td><td>西嶼鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.1" class="fw-semibold">0.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>澎湖縣</td><td>白沙鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.4" class="fw-semibold">0.4</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>龜山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.7" class="fw-semibold">2.7</td>
+        <td data-sort="0.4">0.4</td><td data-sort="1.9">1.9</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹縣</td><td>北埔鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.6" class="fw-semibold">0.6</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>中和區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.2" class="fw-semibold">0.2</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>五股區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.8" class="fw-semibold">0.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.4">0.4</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>土城區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.8" class="fw-semibold">0.8</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.5">0.5</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>林口區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="1.2">1.2</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>樹林區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.5" class="fw-semibold">1.5</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.5">0.5</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>泰山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.0" class="fw-semibold">0.0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>淡水區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="1.1">1.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新北市</td><td>瑞芳區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="4.5" class="fw-semibold">4.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="4.3">4.3</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹市</td><td>東區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.0" class="fw-semibold">1.0</td>
+        <td data-sort="0.2">0.2</td><td data-sort="0.3">0.3</td><td data-sort="0.4">0.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹市</td><td>香山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.1" class="fw-semibold">3.1</td>
+        <td data-sort="0.2">0.2</td><td data-sort="1.7">1.7</td><td data-sort="0.7">0.7</td><td data-sort="0.5">0.5</td></tr>
+    
+      <tr><td>新竹縣</td><td>寶山鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.5" class="fw-semibold">0.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.3">0.3</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>龍潭區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="6.4" class="fw-semibold">6.4</td>
+        <td data-sort="0.3">0.3</td><td data-sort="4.6">4.6</td><td data-sort="1.5">1.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹縣</td><td>新埔鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="2.5" class="fw-semibold">2.5</td>
+        <td data-sort="0.0">0.0</td><td data-sort="2.2">2.2</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹縣</td><td>湖口鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="11.4" class="fw-semibold">11.4</td>
+        <td data-sort="2.1">2.1</td><td data-sort="7.0">7.0</td><td data-sort="2.4">2.4</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹縣</td><td>竹北市</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.8" class="fw-semibold">0.8</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.8">0.8</td><td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹縣</td><td>芎林鄉</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.3" class="fw-semibold">0.3</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.1">0.1</td><td data-sort="0.2">0.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>新竹縣</td><td>關西鎮</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="0.7" class="fw-semibold">0.7</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.6">0.6</td><td data-sort="0.1">0.1</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>八德區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="3.4" class="fw-semibold">3.4</td>
+        <td data-sort="0.2">0.2</td><td data-sort="2.6">2.6</td><td data-sort="0.2">0.2</td><td data-sort="0.4">0.4</td></tr>
+    
+      <tr><td>桃園市</td><td>大溪區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="8.1" class="fw-semibold">8.1</td>
+        <td data-sort="1.3">1.3</td><td data-sort="4.0">4.0</td><td data-sort="2.9">2.9</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>平鎮區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="5.9" class="fw-semibold">5.9</td>
+        <td data-sort="0.5">0.5</td><td data-sort="3.2">3.2</td><td data-sort="2.2">2.2</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>新屋區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="8.7" class="fw-semibold">8.7</td>
+        <td data-sort="0.7">0.7</td><td data-sort="6.5">6.5</td><td data-sort="1.5">1.5</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>桃園市</td><td>蘆竹區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="8.7" class="fw-semibold">8.7</td>
+        <td data-sort="0.2">0.2</td><td data-sort="4.8">4.8</td><td data-sort="3.8">3.8</td><td data-sort="0.0">0.0</td></tr>
+    
+      <tr><td>高雄市</td><td>鼓山區</td><td data-sort="0">0</td>
+        <td data-sort="0.0">0.0</td><td data-sort="0.0">0.0</td>
+        <td data-sort="1.1" class="fw-semibold">1.1</td>
+        <td data-sort="0.1">0.1</td><td data-sort="0.7">0.7</td><td data-sort="0.3">0.3</td><td data-sort="0.0">0.0</td></tr>
+    </tbody>
+  </table></div>
+</div></div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body small">
+  <h2 class="h6 fw-bold">資料來源</h2>
+  <ul class="mb-0">
+    <li>經濟部能源署：取得電業設置發電設備工作許可證太陽光電案場土地地號（108–113 年，data.gov.tw #176025）、各年度各縣市太陽光電發電設備同意備案核准情形（#16423）、再生能源裝置容量年資料（#163718）</li>
+    <li>農業部農村發展及水土保持署：115 年度山坡地範圍圖（水保法、不含六都，#178645）。含六都版本目前只在 BigGIS 圖台提供圖層，未開放下載。</li>
+    <li>農業部林業及自然保育署：國有林事業區圖 1141（#56699）</li>
+    <li>Copernicus DEM GLO-30（ESA，AWS Open Data）；鄉鎮界：taiwan-atlas（內政部）</li>
+    <li>地號無法以開放 API 轉為座標（國土測繪中心搜尋服務只支援門牌），因此以鄉鎮為單位比對。</li>
+  </ul>
+</div></div>
+
+</main>
+
+<footer class="border-top py-3 small text-muted">
+  <div class="container">
+    影像：Copernicus Sentinel-2 L2A（ESA，經 AWS Open Data / Element84 Earth Search）；
+    分類方法參考 <a href="https://gis.ardswc.gov.tw/image-variation-analysis/20" target="_blank">農業部農村水保署 BigGIS Sentinel-2 影像變異分析</a>；
+    縣市界：內政部（<a href="https://github.com/dkaoster/taiwan-atlas" target="_blank">taiwan-atlas</a>）。
+    原始碼：<a href="https://github.com/richliu/treecrowns" target="_blank">github.com/richliu/treecrowns</a>。
+    產製時間 2026-09-27 19:37。本站為實驗性分析，數據僅供參考。<br>單位：1 公頃 = 10,000 平方公尺（100 m × 100 m）≈ 3,025 坪 ≈ 1.03 甲 ≈ 1.4 個標準足球場；大安森林公園約 26 公頃。
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/umd/simple-datatables.min.js"></script>
+<script>
+const V = {"baseline": 2018, "analysis_years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "sites": {"n_sites": 3026, "area": 3816.2, "by_terrain": {"slopeland": {"tree": 17.7, "water": 7.7, "farm": 125.8, "bare": 71.9, "n": 394, "area": 225.0}, "flat": {"tree": 76.4, "water": 1191.7, "farm": 1734.0, "bare": 570.0, "n": 2632, "area": 3591.2}, "nat_forest": {"tree": 1.5, "water": 0.0, "farm": 25.4, "bare": 1.9, "n": 20, "area": 29.7}}}, "towns": {"corr": 0.792, "plants_n": 419, "plants_land_ha": 6684.7, "plants_mw": 3987.1, "det_total": 3865.6, "det_in_plant_towns": 3402.0, "ratio_det_to_land": 0.459, "towns": [{"county": "臺南市", "town": "七股區", "plant_n": 64, "plant_land": 813.7, "plant_mw": 696.1, "det": 504.8, "det_tree": 1.6, "det_water": 191.5, "det_farm": 259.4, "det_bare": 52.3}, {"county": "臺南市", "town": "北門區", "plant_n": 10, "plant_land": 686.4, "plant_mw": 174.7, "det": 186.0, "det_tree": 0.0, "det_water": 86.2, "det_farm": 85.9, "det_bare": 13.8}, {"county": "彰化縣", "town": "鹿港鎮", "plant_n": 9, "plant_land": 542.0, "plant_mw": 574.6, "det": 604.7, "det_tree": 0.0, "det_water": 479.5, "det_farm": 38.2, "det_bare": 86.9}, {"county": "雲林縣", "town": "斗六市", "plant_n": 5, "plant_land": 409.4, "plant_mw": 22.6, "det": 38.2, "det_tree": 0.6, "det_water": 0.4, "det_farm": 22.4, "det_bare": 14.8}, {"county": "臺中市", "town": "龍井區", "plant_n": 7, "plant_land": 356.2, "plant_mw": 23.6, "det": 7.5, "det_tree": 0.0, "det_water": 0.2, "det_farm": 3.4, "det_bare": 3.9}, {"county": "屏東縣", "town": "枋寮鄉", "plant_n": 19, "plant_land": 345.1, "plant_mw": 189.3, "det": 40.3, "det_tree": 6.0, "det_water": 2.5, "det_farm": 30.0, "det_bare": 1.8}, {"county": "高雄市", "town": "小港區", "plant_n": 6, "plant_land": 292.7, "plant_mw": 25.4, "det": 33.9, "det_tree": 0.0, "det_water": 3.1, "det_farm": 19.4, "det_bare": 11.4}, {"county": "雲林縣", "town": "臺西鄉", "plant_n": 15, "plant_land": 281.4, "plant_mw": 334.2, "det": 113.0, "det_tree": 0.0, "det_water": 10.5, "det_farm": 95.3, "det_bare": 7.2}, {"county": "嘉義縣", "town": "義竹鄉", "plant_n": 17, "plant_land": 255.4, "plant_mw": 212.1, "det": 250.5, "det_tree": 0.0, "det_water": 75.9, "det_farm": 154.2, "det_bare": 20.5}, {"county": "嘉義縣", "town": "布袋鎮", "plant_n": 16, "plant_land": 220.9, "plant_mw": 147.5, "det": 120.7, "det_tree": 0.0, "det_water": 43.4, "det_farm": 62.6, "det_bare": 14.8}, {"county": "雲林縣", "town": "口湖鄉", "plant_n": 13, "plant_land": 201.3, "plant_mw": 135.1, "det": 158.3, "det_tree": 0.4, "det_water": 9.3, "det_farm": 141.9, "det_bare": 6.7}, {"county": "屏東縣", "town": "佳冬鄉", "plant_n": 38, "plant_land": 151.1, "plant_mw": 134.3, "det": 53.0, "det_tree": 8.1, "det_water": 4.2, "det_farm": 39.0, "det_bare": 1.7}, {"county": "桃園市", "town": "觀音區", "plant_n": 7, "plant_land": 145.2, "plant_mw": 18.1, "det": 26.2, "det_tree": 1.0, "det_water": 5.8, "det_farm": 11.8, "det_bare": 7.6}, {"county": "高雄市", "town": "彌陀區", "plant_n": 3, "plant_land": 121.9, "plant_mw": 78.5, "det": 52.0, "det_tree": 0.0, "det_water": 28.6, "det_farm": 22.4, "det_bare": 0.9}, {"county": "臺南市", "town": "學甲區", "plant_n": 9, "plant_land": 107.5, "plant_mw": 96.1, "det": 117.7, "det_tree": 0.2, "det_water": 28.2, "det_farm": 85.2, "det_bare": 4.1}, {"county": "臺南市", "town": "鹽水區", "plant_n": 4, "plant_land": 99.6, "plant_mw": 113.2, "det": 31.0, "det_tree": 0.0, "det_water": 2.4, "det_farm": 26.4, "det_bare": 2.1}, {"county": "臺南市", "town": "官田區", "plant_n": 2, "plant_land": 92.0, "plant_mw": 33.1, "det": 30.0, "det_tree": 0.7, "det_water": 11.5, "det_farm": 14.1, "det_bare": 3.7}, {"county": "苗栗縣", "town": "三義鄉", "plant_n": 4, "plant_land": 82.6, "plant_mw": 9.6, "det": 1.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 1.4}, {"county": "花蓮縣", "town": "鳳林鎮", "plant_n": 1, "plant_land": 66.0, "plant_mw": 75.0, "det": 38.8, "det_tree": 37.4, "det_water": 0.0, "det_farm": 1.4, "det_bare": 0.0}, {"county": "彰化縣", "town": "二林鎮", "plant_n": 1, "plant_land": 64.0, "plant_mw": 32.6, "det": 40.8, "det_tree": 0.1, "det_water": 1.2, "det_farm": 22.6, "det_bare": 16.9}, {"county": "雲林縣", "town": "麥寮鄉", "plant_n": 5, "plant_land": 56.7, "plant_mw": 38.9, "det": 33.0, "det_tree": 0.0, "det_water": 10.0, "det_farm": 18.5, "det_bare": 4.5}, {"county": "屏東縣", "town": "獅子鄉", "plant_n": 1, "plant_land": 51.9, "plant_mw": 42.5, "det": 1.1, "det_tree": 1.1, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "高雄市", "town": "大樹區", "plant_n": 1, "plant_land": 51.4, "plant_mw": 45.2, "det": 7.9, "det_tree": 1.7, "det_water": 0.0, "det_farm": 5.0, "det_bare": 1.2}, {"county": "嘉義縣", "town": "布袋鄉", "plant_n": 3, "plant_land": 46.6, "plant_mw": 26.5, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "高雄市", "town": "路竹區", "plant_n": 4, "plant_land": 44.0, "plant_mw": 23.3, "det": 38.3, "det_tree": 0.0, "det_water": 9.3, "det_farm": 16.8, "det_bare": 12.2}, {"county": "臺南市", "town": "仁德區", "plant_n": 1, "plant_land": 42.5, "plant_mw": 5.5, "det": 8.0, "det_tree": 0.0, "det_water": 0.3, "det_farm": 3.3, "det_bare": 4.4}, {"county": "彰化縣", "town": "大城鄉", "plant_n": 2, "plant_land": 41.0, "plant_mw": 47.4, "det": 31.0, "det_tree": 0.1, "det_water": 9.9, "det_farm": 19.1, "det_bare": 2.0}, {"county": "嘉義縣", "town": "東石鄉", "plant_n": 7, "plant_land": 39.1, "plant_mw": 22.5, "det": 33.5, "det_tree": 0.0, "det_water": 2.2, "det_farm": 29.8, "det_bare": 1.5}, {"county": "屏東縣", "town": "高樹鄉", "plant_n": 3, "plant_land": 37.7, "plant_mw": 41.0, "det": 15.0, "det_tree": 0.5, "det_water": 0.0, "det_farm": 12.3, "det_bare": 2.2}, {"county": "澎湖縣", "town": "湖西鄉", "plant_n": 5, "plant_land": 37.6, "plant_mw": 30.2, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "臺南市", "town": "善化區", "plant_n": 4, "plant_land": 35.6, "plant_mw": 15.8, "det": 14.4, "det_tree": 0.1, "det_water": 0.0, "det_farm": 10.0, "det_bare": 4.4}, {"county": "新竹縣", "town": "新豐鄉", "plant_n": 3, "plant_land": 33.5, "plant_mw": 6.7, "det": 10.4, "det_tree": 0.0, "det_water": 3.7, "det_farm": 4.2, "det_bare": 2.6}, {"county": "嘉義縣", "town": "大林鎮", "plant_n": 3, "plant_land": 33.3, "plant_mw": 8.7, "det": 22.4, "det_tree": 2.4, "det_water": 0.4, "det_farm": 13.5, "det_bare": 6.2}, {"county": "屏東縣", "town": "林邊鄉", "plant_n": 5, "plant_land": 32.2, "plant_mw": 29.3, "det": 44.6, "det_tree": 2.8, "det_water": 17.9, "det_farm": 23.2, "det_bare": 0.6}, {"county": "高雄市", "town": "永安區", "plant_n": 4, "plant_land": 31.8, "plant_mw": 14.8, "det": 27.7, "det_tree": 0.0, "det_water": 12.5, "det_farm": 11.3, "det_bare": 3.9}, {"county": "桃園市", "town": "桃園區", "plant_n": 3, "plant_land": 30.7, "plant_mw": 2.7, "det": 1.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.5, "det_bare": 0.8}, {"county": "屏東縣", "town": "潮洲鎮", "plant_n": 1, "plant_land": 30.2, "plant_mw": 3.1, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "高雄市", "town": "鳳山區", "plant_n": 1, "plant_land": 29.9, "plant_mw": 3.2, "det": 3.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.4, "det_bare": 1.7}, {"county": "桃園市", "town": "大園區", "plant_n": 3, "plant_land": 27.8, "plant_mw": 6.7, "det": 20.1, "det_tree": 0.1, "det_water": 6.9, "det_farm": 7.4, "det_bare": 5.6}, {"county": "彰化縣", "town": "芳苑鄉", "plant_n": 5, "plant_land": 27.1, "plant_mw": 13.6, "det": 19.1, "det_tree": 0.5, "det_water": 2.8, "det_farm": 10.1, "det_bare": 5.7}, {"county": "雲林縣", "town": "古坑鄉", "plant_n": 1, "plant_land": 26.5, "plant_mw": 29.4, "det": 4.4, "det_tree": 0.8, "det_water": 0.0, "det_farm": 3.2, "det_bare": 0.4}, {"county": "苗栗縣", "town": "西湖鄉", "plant_n": 1, "plant_land": 25.0, "plant_mw": 7.0, "det": 0.7, "det_tree": 0.2, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.2}, {"county": "臺南市", "town": "安南區", "plant_n": 2, "plant_land": 23.6, "plant_mw": 3.4, "det": 39.1, "det_tree": 0.0, "det_water": 2.7, "det_farm": 21.2, "det_bare": 15.2}, {"county": "臺南市", "town": "麻豆區", "plant_n": 6, "plant_land": 20.7, "plant_mw": 28.6, "det": 20.8, "det_tree": 0.0, "det_water": 3.1, "det_farm": 16.2, "det_bare": 1.6}, {"county": "臺中市", "town": "沙鹿區", "plant_n": 1, "plant_land": 20.7, "plant_mw": 5.6, "det": 4.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 3.8}, {"county": "臺南市", "town": "山上區", "plant_n": 9, "plant_land": 20.4, "plant_mw": 24.9, "det": 6.6, "det_tree": 0.3, "det_water": 0.0, "det_farm": 4.9, "det_bare": 1.4}, {"county": "新北市", "town": "板橋區", "plant_n": 1, "plant_land": 20.2, "plant_mw": 5.0, "det": 1.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.2}, {"county": "桃園市", "town": "楊梅區", "plant_n": 2, "plant_land": 20.2, "plant_mw": 1.5, "det": 22.9, "det_tree": 0.3, "det_water": 0.4, "det_farm": 9.2, "det_bare": 13.0}, {"county": "臺中市", "town": "北屯區", "plant_n": 1, "plant_land": 19.0, "plant_mw": 2.9, "det": 1.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.6, "det_bare": 0.0}, {"county": "屏東縣", "town": "新園鄉", "plant_n": 1, "plant_land": 18.4, "plant_mw": 3.5, "det": 6.2, "det_tree": 0.1, "det_water": 0.3, "det_farm": 5.4, "det_bare": 0.5}, {"county": "嘉義縣", "town": "鹿草鄉", "plant_n": 2, "plant_land": 18.3, "plant_mw": 7.8, "det": 13.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 5.8, "det_bare": 7.7}, {"county": "苗栗縣", "town": "後龍鎮", "plant_n": 1, "plant_land": 16.9, "plant_mw": 9.6, "det": 9.3, "det_tree": 0.0, "det_water": 7.8, "det_farm": 1.6, "det_bare": 0.0}, {"county": "雲林縣", "town": "四湖鄉", "plant_n": 4, "plant_land": 16.3, "plant_mw": 22.2, "det": 4.9, "det_tree": 0.0, "det_water": 0.2, "det_farm": 3.5, "det_bare": 1.2}, {"county": "宜蘭縣", "town": "五結鄉", "plant_n": 2, "plant_land": 14.1, "plant_mw": 11.5, "det": 3.8, "det_tree": 0.0, "det_water": 0.1, "det_farm": 2.3, "det_bare": 1.5}, {"county": "高雄市", "town": "岡山區", "plant_n": 3, "plant_land": 14.1, "plant_mw": 6.3, "det": 29.9, "det_tree": 0.0, "det_water": 6.3, "det_farm": 12.4, "det_bare": 11.2}, {"county": "南投縣", "town": "南投市", "plant_n": 1, "plant_land": 14.0, "plant_mw": 3.3, "det": 3.9, "det_tree": 0.0, "det_water": 0.1, "det_farm": 2.5, "det_bare": 1.3}, {"county": "花蓮縣", "town": "花蓮市", "plant_n": 2, "plant_land": 13.3, "plant_mw": 2.9, "det": 4.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 2.2, "det_bare": 1.8}, {"county": "臺中市", "town": "梧棲區", "plant_n": 2, "plant_land": 12.8, "plant_mw": 5.3, "det": 16.4, "det_tree": 0.0, "det_water": 0.7, "det_farm": 6.1, "det_bare": 9.6}, {"county": "嘉義縣", "town": "中埔鄉", "plant_n": 1, "plant_land": 12.5, "plant_mw": 4.4, "det": 4.4, "det_tree": 0.0, "det_water": 0.8, "det_farm": 2.6, "det_bare": 1.0}, {"county": "雲林縣", "town": "林內鄉", "plant_n": 2, "plant_land": 11.6, "plant_mw": 4.5, "det": 0.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.0}, {"county": "屏東縣", "town": "林邊鎮", "plant_n": 1, "plant_land": 11.5, "plant_mw": 11.7, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "高雄市", "town": "楠梓區", "plant_n": 1, "plant_land": 10.7, "plant_mw": 3.9, "det": 4.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 3.3, "det_bare": 1.2}, {"county": "新北市", "town": "八里區", "plant_n": 2, "plant_land": 10.1, "plant_mw": 7.0, "det": 1.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.8}, {"county": "新北市", "town": "蘆洲區", "plant_n": 1, "plant_land": 9.9, "plant_mw": 3.0, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "新北市", "town": "鶯歌區", "plant_n": 1, "plant_land": 9.7, "plant_mw": 1.9, "det": 2.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.1, "det_bare": 0.9}, {"county": "高雄市", "town": "橋頭區", "plant_n": 1, "plant_land": 9.5, "plant_mw": 4.1, "det": 4.9, "det_tree": 0.0, "det_water": 2.5, "det_farm": 1.6, "det_bare": 0.8}, {"county": "屏東縣", "town": "崁頂鄉", "plant_n": 1, "plant_land": 8.6, "plant_mw": 3.7, "det": 5.0, "det_tree": 0.5, "det_water": 0.0, "det_farm": 3.6, "det_bare": 0.9}, {"county": "苗栗縣", "town": "銅鑼鄉", "plant_n": 1, "plant_land": 8.3, "plant_mw": 7.2, "det": 4.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 2.6, "det_bare": 1.8}, {"county": "屏東縣", "town": "東港鎮", "plant_n": 1, "plant_land": 8.3, "plant_mw": 3.8, "det": 7.1, "det_tree": 0.0, "det_water": 3.4, "det_farm": 2.9, "det_bare": 0.8}, {"county": "臺南市", "town": "新營區", "plant_n": 4, "plant_land": 7.9, "plant_mw": 2.7, "det": 4.7, "det_tree": 0.0, "det_water": 0.1, "det_farm": 3.8, "det_bare": 0.7}, {"county": "高雄市", "town": "燕巢區", "plant_n": 1, "plant_land": 7.3, "plant_mw": 4.3, "det": 13.2, "det_tree": 0.0, "det_water": 7.0, "det_farm": 2.2, "det_bare": 4.0}, {"county": "基隆市", "town": "七堵區", "plant_n": 1, "plant_land": 7.3, "plant_mw": 2.0, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "屏東鎮", "town": "林邊鄉", "plant_n": 1, "plant_land": 6.9, "plant_mw": 6.9, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "臺南市", "town": "永康區", "plant_n": 2, "plant_land": 6.6, "plant_mw": 2.2, "det": 15.6, "det_tree": 0.1, "det_water": 0.0, "det_farm": 11.8, "det_bare": 3.7}, {"county": "新北市", "town": "新莊區", "plant_n": 1, "plant_land": 6.5, "plant_mw": 3.6, "det": 2.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.3, "det_bare": 0.8}, {"county": "新北市", "town": "三峽區", "plant_n": 1, "plant_land": 6.1, "plant_mw": 2.3, "det": 1.1, "det_tree": 0.6, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.1}, {"county": "桃園縣", "town": "大溪區", "plant_n": 1, "plant_land": 5.9, "plant_mw": 1.0, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "臺南市", "town": "新市區", "plant_n": 1, "plant_land": 5.9, "plant_mw": 0.7, "det": 36.8, "det_tree": 0.0, "det_water": 3.2, "det_farm": 17.0, "det_bare": 16.6}, {"county": "臺東縣", "town": "臺東市", "plant_n": 1, "plant_land": 5.7, "plant_mw": 5.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.1, "det_bare": 0.4}, {"county": "桃園市", "town": "中壢區", "plant_n": 1, "plant_land": 5.7, "plant_mw": 1.1, "det": 7.9, "det_tree": 0.1, "det_water": 0.1, "det_farm": 5.2, "det_bare": 2.6}, {"county": "彰化縣", "town": "線西鄉", "plant_n": 2, "plant_land": 5.5, "plant_mw": 2.7, "det": 21.8, "det_tree": 0.0, "det_water": 0.7, "det_farm": 8.7, "det_bare": 12.4}, {"county": "臺南市", "town": "關廟區", "plant_n": 1, "plant_land": 5.5, "plant_mw": 0.5, "det": 5.7, "det_tree": 0.0, "det_water": 0.6, "det_farm": 2.4, "det_bare": 2.7}, {"county": "臺北市", "town": "大安區", "plant_n": 1, "plant_land": 5.3, "plant_mw": 2.1, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "臺南市", "town": "中西區", "plant_n": 1, "plant_land": 5.1, "plant_mw": 0.5, "det": 0.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.0}, {"county": "連江縣", "town": "南竿鄉", "plant_n": 1, "plant_land": 4.8, "plant_mw": 0.0, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "高雄市", "town": "茄萣區", "plant_n": 1, "plant_land": 4.7, "plant_mw": 2.4, "det": 12.2, "det_tree": 0.0, "det_water": 3.4, "det_farm": 7.0, "det_bare": 1.8}, {"county": "高雄市", "town": "湖內區", "plant_n": 1, "plant_land": 4.4, "plant_mw": 3.1, "det": 15.5, "det_tree": 0.0, "det_water": 5.1, "det_farm": 9.3, "det_bare": 1.1}, {"county": "宜蘭縣", "town": "三星鄉", "plant_n": 1, "plant_land": 3.0, "plant_mw": 3.6, "det": 0.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.2}, {"county": "彰化縣", "town": "永靖鄉", "plant_n": 1, "plant_land": 2.9, "plant_mw": 3.1, "det": 1.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.4}, {"county": "屏東縣", "town": "內埔鄉", "plant_n": 2, "plant_land": 2.8, "plant_mw": 2.1, "det": 6.4, "det_tree": 0.6, "det_water": 0.0, "det_farm": 4.8, "det_bare": 1.0}, {"county": "高雄市", "town": "三民區", "plant_n": 1, "plant_land": 2.7, "plant_mw": 0.3, "det": 1.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.8}, {"county": "屏東縣", "town": "長治鄉", "plant_n": 2, "plant_land": 2.4, "plant_mw": 2.4, "det": 6.6, "det_tree": 0.8, "det_water": 0.1, "det_farm": 4.2, "det_bare": 1.6}, {"county": "嘉義鄉", "town": "布袋鎮", "plant_n": 1, "plant_land": 2.0, "plant_mw": 2.4, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "屏東縣", "town": "車城鄉", "plant_n": 1, "plant_land": 2.0, "plant_mw": 2.4, "det": 7.5, "det_tree": 6.0, "det_water": 0.0, "det_farm": 1.2, "det_bare": 0.3}, {"county": "屏東縣", "town": "鹽埔鄉", "plant_n": 1, "plant_land": 1.9, "plant_mw": 1.9, "det": 9.9, "det_tree": 0.3, "det_water": 0.1, "det_farm": 7.0, "det_bare": 2.6}, {"county": "屏東縣", "town": "里港鄉", "plant_n": 1, "plant_land": 1.8, "plant_mw": 1.8, "det": 8.7, "det_tree": 0.3, "det_water": 0.5, "det_farm": 7.3, "det_bare": 0.5}, {"county": "屏東縣", "town": "恆春鎮", "plant_n": 1, "plant_land": 1.8, "plant_mw": 2.1, "det": 11.1, "det_tree": 5.7, "det_water": 0.4, "det_farm": 4.1, "det_bare": 0.9}, {"county": "臺中市", "town": "后里區", "plant_n": 1, "plant_land": 1.8, "plant_mw": 2.0, "det": 10.5, "det_tree": 0.1, "det_water": 0.1, "det_farm": 4.6, "det_bare": 5.6}, {"county": "屏東縣", "town": "新埤鄉", "plant_n": 1, "plant_land": 1.7, "plant_mw": 1.9, "det": 6.3, "det_tree": 0.0, "det_water": 0.1, "det_farm": 5.7, "det_bare": 0.5}, {"county": "南投縣", "town": "水里鄉", "plant_n": 1, "plant_land": 1.6, "plant_mw": 1.0, "det": 0.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.0}, {"county": "臺南市", "town": "下營區", "plant_n": 1, "plant_land": 1.5, "plant_mw": 1.5, "det": 2.2, "det_tree": 0.0, "det_water": 0.6, "det_farm": 1.5, "det_bare": 0.2}, {"county": "臺南市", "town": "白河區", "plant_n": 1, "plant_land": 1.4, "plant_mw": 0.9, "det": 3.9, "det_tree": 0.1, "det_water": 0.0, "det_farm": 2.9, "det_bare": 0.8}, {"county": "臺南市", "town": "柳營區", "plant_n": 1, "plant_land": 1.3, "plant_mw": 1.0, "det": 10.1, "det_tree": 0.3, "det_water": 0.1, "det_farm": 7.8, "det_bare": 2.0}, {"county": "彰化縣", "town": "溪州鄉", "plant_n": 1, "plant_land": 1.3, "plant_mw": 2.8, "det": 5.8, "det_tree": 0.7, "det_water": 0.0, "det_farm": 4.0, "det_bare": 1.0}, {"county": "臺中市", "town": "大甲區", "plant_n": 1, "plant_land": 1.1, "plant_mw": 0.7, "det": 2.0, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.8, "det_bare": 1.2}, {"county": "臺南市", "town": "後壁區", "plant_n": 1, "plant_land": 0.8, "plant_mw": 0.9, "det": 3.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 2.6, "det_bare": 0.4}, {"county": "金門縣", "town": "金城鎮", "plant_n": 1, "plant_land": 0.6, "plant_mw": 0.2, "det": 0.7, "det_tree": 0.0, "det_water": 0.2, "det_farm": 0.5, "det_bare": 0.0}, {"county": "金門縣", "town": "金湖鎮", "plant_n": 1, "plant_land": 0.4, "plant_mw": 0.0, "det": 1.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.5}, {"county": "臺南市", "town": "將軍區", "plant_n": 1, "plant_land": 0.1, "plant_mw": 120.0, "det": 148.7, "det_tree": 0.0, "det_water": 54.8, "det_farm": 63.6, "det_bare": 30.4}, {"county": "屏東縣", "town": "萬丹鄉", "plant_n": 2, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.8, "det_tree": 0.0, "det_water": 0.5, "det_farm": 1.1, "det_bare": 0.3}, {"county": "臺南市", "town": "安定區", "plant_n": 1, "plant_land": 0.0, "plant_mw": 0.0, "det": 6.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 4.9, "det_bare": 1.5}, {"county": "苗栗縣", "town": "公館鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.5, "det_tree": 0.1, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.0}, {"county": "臺南市", "town": "楠西區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.2}, {"county": "高雄市", "town": "大寮區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 20.5, "det_tree": 0.0, "det_water": 0.3, "det_farm": 6.2, "det_bare": 14.0}, {"county": "臺南市", "town": "東區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.4}, {"county": "臺南市", "town": "東山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.6, "det_tree": 0.2, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.0}, {"county": "高雄市", "town": "前鎮區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 10.8, "det_tree": 0.0, "det_water": 0.3, "det_farm": 5.3, "det_bare": 5.3}, {"county": "高雄市", "town": "仁武區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 8.3, "det_tree": 0.0, "det_water": 2.3, "det_farm": 3.7, "det_bare": 2.3}, {"county": "臺南市", "town": "新化區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.6, "det_tree": 0.0, "det_water": 2.6, "det_farm": 0.7, "det_bare": 0.3}, {"county": "雲林縣", "town": "西螺鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.3, "det_tree": 0.0, "det_water": 0.6, "det_farm": 1.2, "det_bare": 0.5}, {"county": "臺南市", "town": "歸仁區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 8.9, "det_tree": 0.0, "det_water": 0.0, "det_farm": 5.6, "det_bare": 3.3}, {"county": "雲林縣", "town": "褒忠鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.9, "det_tree": 0.5, "det_water": 0.1, "det_farm": 0.1, "det_bare": 0.2}, {"county": "臺南市", "town": "玉井區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.0}, {"county": "雲林縣", "town": "虎尾鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 7.7, "det_tree": 0.2, "det_water": 1.0, "det_farm": 4.6, "det_bare": 1.9}, {"county": "高雄市", "town": "大社區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.9, "det_tree": 0.1, "det_water": 0.0, "det_farm": 1.6, "det_bare": 0.2}, {"county": "高雄市", "town": "旗山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.5, "det_bare": 0.0}, {"county": "高雄市", "town": "左營區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 14.8, "det_tree": 0.0, "det_water": 0.2, "det_farm": 7.5, "det_bare": 7.1}, {"county": "臺南市", "town": "左鎮區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.7, "det_bare": 0.5}, {"county": "高雄市", "town": "旗津區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.9, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.9, "det_bare": 0.1}, {"county": "高雄市", "town": "林園區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.2, "det_bare": 0.6}, {"county": "高雄市", "town": "桃源區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.2}, {"county": "高雄市", "town": "梓官區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.4}, {"county": "高雄市", "town": "美濃區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.1, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.0}, {"county": "高雄市", "town": "苓雅區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.8}, {"county": "高雄市", "town": "阿蓮區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 3.8, "det_bare": 0.5}, {"county": "臺南市", "town": "安平區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.6, "det_tree": 0.0, "det_water": 0.3, "det_farm": 2.0, "det_bare": 1.2}, {"county": "高雄市", "town": "鳥松區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.4, "det_bare": 0.5}, {"county": "高雄市", "town": "鹽埕區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.4}, {"county": "臺南市", "town": "西港區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.3}, {"county": "雲林縣", "town": "莿桐鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.4, "det_tree": 0.1, "det_water": 0.0, "det_farm": 1.7, "det_bare": 0.6}, {"county": "苗栗縣", "town": "竹南鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 11.0, "det_tree": 0.0, "det_water": 0.2, "det_farm": 7.6, "det_bare": 3.1}, {"county": "苗栗縣", "town": "頭屋鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.2}, {"county": "苗栗縣", "town": "三灣鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.2, "det_tree": 0.1, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.4}, {"county": "苗栗縣", "town": "苑裡鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.1, "det_bare": 0.1}, {"county": "苗栗縣", "town": "苗栗市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.2, "det_farm": 0.9, "det_bare": 0.3}, {"county": "苗栗縣", "town": "通霄鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 6.6, "det_tree": 0.7, "det_water": 0.0, "det_farm": 4.2, "det_bare": 1.7}, {"county": "花蓮縣", "town": "秀林鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 18.8, "det_tree": 0.1, "det_water": 0.0, "det_farm": 17.9, "det_bare": 0.7}, {"county": "花蓮縣", "town": "瑞穗鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.3}, {"county": "花蓮縣", "town": "玉里鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.9, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.3}, {"county": "苗栗縣", "town": "造橋鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.4, "det_bare": 0.5}, {"county": "花蓮縣", "town": "新城鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.3}, {"county": "苗栗縣", "town": "頭份市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 2.0, "det_bare": 0.3}, {"county": "花蓮縣", "town": "壽豐鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "花蓮縣", "town": "吉安鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.1, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.7}, {"county": "花蓮縣", "town": "光復鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.2}, {"county": "金門縣", "town": "金寧鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.3}, {"county": "雲林縣", "town": "水林鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.2, "det_tree": 0.0, "det_water": 0.2, "det_farm": 3.4, "det_bare": 0.6}, {"county": "臺東縣", "town": "長濱鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "雲林縣", "town": "二崙鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.4}, {"county": "雲林縣", "town": "元長鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.9, "det_tree": 0.0, "det_water": 0.2, "det_farm": 1.4, "det_bare": 0.2}, {"county": "臺東縣", "town": "海端鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 12.6, "det_tree": 1.5, "det_water": 0.0, "det_farm": 9.9, "det_bare": 1.1}, {"county": "雲林縣", "town": "北港鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.7}, {"county": "雲林縣", "town": "土庫鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.2}, {"county": "臺東縣", "town": "池上鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.5, "det_water": 0.0, "det_farm": 0.3, "det_bare": 0.1}, {"county": "臺東縣", "town": "延平鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.4, "det_tree": 0.3, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.0}, {"county": "雲林縣", "town": "大埤鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 1.3}, {"county": "臺東縣", "town": "卑南鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.5, "det_tree": 0.4, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.0}, {"county": "雲林縣", "town": "崙背鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.7, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.2, "det_bare": 0.4}, {"county": "雲林縣", "town": "斗南鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.3}, {"county": "雲林縣", "town": "東勢鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.3}, {"county": "南投縣", "town": "中寮鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.4, "det_tree": 0.4, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "臺中市", "town": "大安區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.2, "det_tree": 0.0, "det_water": 0.4, "det_farm": 0.9, "det_bare": 0.0}, {"county": "臺南市", "town": "大內區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.9, "det_tree": 0.4, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.0}, {"county": "彰化縣", "town": "竹塘鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.4, "det_tree": 1.2, "det_water": 0.1, "det_farm": 0.9, "det_bare": 0.1}, {"county": "屏東縣", "town": "九如鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 5.9, "det_tree": 0.1, "det_water": 0.0, "det_farm": 4.2, "det_bare": 1.6}, {"county": "屏東縣", "town": "南州鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.9, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.3}, {"county": "屏東縣", "town": "屏東市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 19.5, "det_tree": 0.3, "det_water": 1.7, "det_farm": 8.8, "det_bare": 8.8}, {"county": "屏東縣", "town": "枋山鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.3, "det_tree": 0.2, "det_water": 0.1, "det_farm": 0.8, "det_bare": 0.1}, {"county": "屏東縣", "town": "潮州鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 7.1, "det_tree": 0.2, "det_water": 0.0, "det_farm": 5.6, "det_bare": 1.3}, {"county": "屏東縣", "town": "竹田鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.1, "det_tree": 0.5, "det_water": 0.0, "det_farm": 1.5, "det_bare": 0.1}, {"county": "屏東縣", "town": "萬巒鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.0, "det_tree": 0.1, "det_water": 0.0, "det_farm": 2.5, "det_bare": 0.4}, {"county": "屏東縣", "town": "麟洛鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.5, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.2}, {"county": "彰化縣", "town": "二水鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.0}, {"county": "彰化縣", "town": "伸港鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 6.5, "det_tree": 0.0, "det_water": 0.7, "det_farm": 2.5, "det_bare": 3.3}, {"county": "彰化縣", "town": "北斗鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.3}, {"county": "彰化縣", "town": "和美鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.4, "det_farm": 0.6, "det_bare": 0.5}, {"county": "彰化縣", "town": "員林市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.1, "det_bare": 0.0}, {"county": "彰化縣", "town": "埔心鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.2, "det_bare": 0.4}, {"county": "彰化縣", "town": "埔鹽鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "彰化縣", "town": "埤頭鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.1, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.4, "det_bare": 0.6}, {"county": "彰化縣", "town": "大村鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.1}, {"county": "彰化縣", "town": "彰化市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.4, "det_tree": 0.1, "det_water": 0.2, "det_farm": 0.8, "det_bare": 1.3}, {"county": "彰化縣", "town": "溪湖鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.4, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.5, "det_bare": 0.8}, {"county": "彰化縣", "town": "田中鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "彰化縣", "town": "田尾鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.3, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.9, "det_bare": 0.3}, {"county": "彰化縣", "town": "社頭鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.1}, {"county": "彰化縣", "town": "福興鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.6, "det_tree": 0.0, "det_water": 1.1, "det_farm": 2.2, "det_bare": 1.3}, {"county": "宜蘭縣", "town": "蘇澳鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.7, "det_tree": 0.1, "det_water": 0.3, "det_farm": 1.4, "det_bare": 0.9}, {"county": "宜蘭縣", "town": "礁溪鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.1}, {"county": "宜蘭縣", "town": "宜蘭市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.1, "det_bare": 0.1}, {"county": "嘉義縣", "town": "大埔鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.1, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "南投縣", "town": "名間鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.1, "det_bare": 1.4}, {"county": "南投縣", "town": "國姓鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.5, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.2, "det_bare": 0.3}, {"county": "南投縣", "town": "埔里鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.3, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.9, "det_bare": 0.3}, {"county": "南投縣", "town": "竹山鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.6, "det_tree": 0.1, "det_water": 0.3, "det_farm": 2.7, "det_bare": 0.5}, {"county": "南投縣", "town": "草屯鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.0, "det_bare": 0.6}, {"county": "南投縣", "town": "集集鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.6, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.5, "det_bare": 0.0}, {"county": "南投縣", "town": "魚池鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.9, "det_bare": 0.2}, {"county": "嘉義市", "town": "東區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.8, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.4, "det_bare": 0.3}, {"county": "嘉義市", "town": "西區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.9}, {"county": "嘉義縣", "town": "六腳鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.7, "det_bare": 0.1}, {"county": "嘉義縣", "town": "太保市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 7.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 3.6, "det_bare": 4.0}, {"county": "宜蘭縣", "town": "壯圍鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.1}, {"county": "嘉義縣", "town": "新港鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 13.0, "det_tree": 0.0, "det_water": 0.4, "det_farm": 4.6, "det_bare": 8.0}, {"county": "嘉義縣", "town": "朴子市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.2, "det_tree": 0.0, "det_water": 0.2, "det_farm": 0.9, "det_bare": 0.1}, {"county": "嘉義縣", "town": "梅山鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.6, "det_bare": 0.2}, {"county": "嘉義縣", "town": "民雄鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.3, "det_tree": 0.0, "det_water": 0.1, "det_farm": 2.3, "det_bare": 1.9}, {"county": "嘉義縣", "town": "水上鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.3, "det_bare": 1.2}, {"county": "嘉義縣", "town": "溪口鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.1}, {"county": "嘉義縣", "town": "竹崎鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.0, "det_bare": 0.0}, {"county": "基隆市", "town": "安樂區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.3, "det_bare": 0.0}, {"county": "宜蘭縣", "town": "冬山鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.9, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.1, "det_bare": 1.7}, {"county": "宜蘭縣", "town": "員山鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.6, "det_tree": 1.1, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.1}, {"county": "彰化縣", "town": "秀水鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.3, "det_tree": 0.0, "det_water": 0.2, "det_farm": 0.7, "det_bare": 0.4}, {"county": "彰化縣", "town": "花壇鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.0}, {"county": "臺南市", "town": "南區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 12.5, "det_tree": 0.0, "det_water": 6.9, "det_farm": 3.7, "det_bare": 1.9}, {"county": "新北市", "town": "三重區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.9, "det_bare": 0.2}, {"county": "臺中市", "town": "南區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.1}, {"county": "臺中市", "town": "南屯區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 6.2, "det_tree": 0.0, "det_water": 1.0, "det_farm": 2.3, "det_bare": 3.0}, {"county": "臺中市", "town": "外埔區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.6, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.4, "det_bare": 2.1}, {"county": "臺中市", "town": "大肚區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.9, "det_tree": 0.1, "det_water": 0.1, "det_farm": 2.5, "det_bare": 2.4}, {"county": "臺中市", "town": "大里區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.8, "det_tree": 0.0, "det_water": 0.2, "det_farm": 0.6, "det_bare": 0.0}, {"county": "臺中市", "town": "大雅區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.8, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.1, "det_bare": 1.6}, {"county": "臺中市", "town": "太平區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.8, "det_bare": 0.3}, {"county": "臺中市", "town": "新社區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.8, "det_tree": 0.0, "det_water": 0.2, "det_farm": 1.0, "det_bare": 1.5}, {"county": "臺中市", "town": "東區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.3, "det_tree": 0.0, "det_water": 0.6, "det_farm": 0.3, "det_bare": 0.4}, {"county": "臺中市", "town": "清水區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 6.7, "det_tree": 0.0, "det_water": 0.7, "det_farm": 3.6, "det_bare": 2.4}, {"county": "臺中市", "town": "潭子區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.8, "det_tree": 0.0, "det_water": 0.1, "det_farm": 1.1, "det_bare": 0.6}, {"county": "臺中市", "town": "烏日區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 2.0, "det_bare": 0.2}, {"county": "臺中市", "town": "石岡區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "臺中市", "town": "神岡區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.2, "det_tree": 0.0, "det_water": 0.3, "det_farm": 1.6, "det_bare": 1.3}, {"county": "臺中市", "town": "西屯區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 7.7, "det_tree": 0.0, "det_water": 0.5, "det_farm": 3.2, "det_bare": 4.0}, {"county": "臺中市", "town": "豐原區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.2, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.6, "det_bare": 0.5}, {"county": "臺中市", "town": "霧峰區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.4, "det_bare": 1.3}, {"county": "臺北市", "town": "中山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.3, "det_bare": 0.1}, {"county": "臺北市", "town": "內湖區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.2}, {"county": "臺北市", "town": "南港區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.8, "det_bare": 0.3}, {"county": "臺南市", "town": "佳里區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.8, "det_tree": 0.0, "det_water": 1.4, "det_farm": 2.9, "det_bare": 0.4}, {"county": "臺南市", "town": "六甲區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.0, "det_bare": 0.0}, {"county": "臺南市", "town": "南化區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.3, "det_bare": 0.8}, {"county": "澎湖縣", "town": "西嶼鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.0}, {"county": "澎湖縣", "town": "白沙鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.4, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.0}, {"county": "桃園市", "town": "龜山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.7, "det_tree": 0.0, "det_water": 0.4, "det_farm": 1.9, "det_bare": 0.3}, {"county": "新竹縣", "town": "北埔鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.6, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.3, "det_bare": 0.2}, {"county": "新北市", "town": "中和區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.2, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.2, "det_bare": 0.0}, {"county": "新北市", "town": "五股區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.4, "det_bare": 0.4}, {"county": "新北市", "town": "土城區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.8, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.5, "det_bare": 0.3}, {"county": "新北市", "town": "林口區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 1.2, "det_bare": 0.3}, {"county": "新北市", "town": "樹林區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.5, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.5, "det_bare": 0.8}, {"county": "新北市", "town": "泰山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.0, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.0, "det_bare": 0.0}, {"county": "新北市", "town": "淡水區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 1.1}, {"county": "新北市", "town": "瑞芳區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 4.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 4.3, "det_bare": 0.2}, {"county": "新竹市", "town": "東區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.0, "det_tree": 0.0, "det_water": 0.2, "det_farm": 0.3, "det_bare": 0.4}, {"county": "新竹市", "town": "香山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.1, "det_tree": 0.5, "det_water": 0.2, "det_farm": 1.7, "det_bare": 0.7}, {"county": "新竹縣", "town": "寶山鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.3, "det_bare": 0.2}, {"county": "桃園市", "town": "龍潭區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 6.4, "det_tree": 0.0, "det_water": 0.3, "det_farm": 4.6, "det_bare": 1.5}, {"county": "新竹縣", "town": "新埔鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 2.5, "det_tree": 0.0, "det_water": 0.0, "det_farm": 2.2, "det_bare": 0.3}, {"county": "新竹縣", "town": "湖口鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 11.4, "det_tree": 0.0, "det_water": 2.1, "det_farm": 7.0, "det_bare": 2.4}, {"county": "新竹縣", "town": "竹北市", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.8, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.8, "det_bare": 0.0}, {"county": "新竹縣", "town": "芎林鄉", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.3, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.1, "det_bare": 0.2}, {"county": "新竹縣", "town": "關西鎮", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 0.7, "det_tree": 0.0, "det_water": 0.0, "det_farm": 0.6, "det_bare": 0.1}, {"county": "桃園市", "town": "八德區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 3.4, "det_tree": 0.4, "det_water": 0.2, "det_farm": 2.6, "det_bare": 0.2}, {"county": "桃園市", "town": "大溪區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 8.1, "det_tree": 0.0, "det_water": 1.3, "det_farm": 4.0, "det_bare": 2.9}, {"county": "桃園市", "town": "平鎮區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 5.9, "det_tree": 0.0, "det_water": 0.5, "det_farm": 3.2, "det_bare": 2.2}, {"county": "桃園市", "town": "新屋區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 8.7, "det_tree": 0.0, "det_water": 0.7, "det_farm": 6.5, "det_bare": 1.5}, {"county": "桃園市", "town": "蘆竹區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 8.7, "det_tree": 0.0, "det_water": 0.2, "det_farm": 4.8, "det_bare": 3.8}, {"county": "高雄市", "town": "鼓山區", "plant_n": 0, "plant_land": 0.0, "plant_mw": 0.0, "det": 1.1, "det_tree": 0.0, "det_water": 0.1, "det_farm": 0.7, "det_bare": 0.3}]}, "plants_by_year": {"2019": {"n": 45, "land_ha": 665.9, "mw": 420.7}, "2020": {"n": 97, "land_ha": 1383.0, "mw": 863.3}, "2021": {"n": 89, "land_ha": 1970.0, "mw": 1279.0}, "2022": {"n": 131, "land_ha": 2000.4, "mw": 983.4}, "2023": {"n": 50, "land_ha": 505.1, "mw": 281.1}, "2024": {"n": 7, "land_ha": 160.2, "mw": 159.6}}, "counties": [{"county": "連江縣", "det_new": 0.0, "approved_mw": 0.5, "ha_per_mw": 0.0}, {"county": "宜蘭縣", "det_new": 13.2, "approved_mw": 241.6, "ha_per_mw": 0.055}, {"county": "彰化縣", "det_new": 753.9, "approved_mw": 2104.8, "ha_per_mw": 0.358}, {"county": "南投縣", "det_new": 17.0, "approved_mw": 317.7, "ha_per_mw": 0.054}, {"county": "雲林縣", "det_new": 380.2, "approved_mw": 1753.8, "ha_per_mw": 0.217}, {"county": "基隆市", "det_new": 0.3, "approved_mw": 37.9, "ha_per_mw": 0.008}, {"county": "臺北市", "det_new": 1.8, "approved_mw": 85.8, "ha_per_mw": 0.021}, {"county": "新北市", "det_new": 19.4, "approved_mw": 258.0, "ha_per_mw": 0.075}, {"county": "臺中市", "det_new": 94.4, "approved_mw": 905.1, "ha_per_mw": 0.104}, {"county": "臺南市", "det_new": 1237.1, "approved_mw": 4181.4, "ha_per_mw": 0.296}, {"county": "桃園市", "det_new": 122.4, "approved_mw": 892.9, "ha_per_mw": 0.137}, {"county": "苗栗縣", "det_new": 42.4, "approved_mw": 528.5, "ha_per_mw": 0.08}, {"county": "嘉義市", "det_new": 3.3, "approved_mw": 55.3, "ha_per_mw": 0.06}, {"county": "嘉義縣", "det_new": 477.8, "approved_mw": 1663.4, "ha_per_mw": 0.287}, {"county": "金門縣", "det_new": 2.3, "approved_mw": 32.6, "ha_per_mw": 0.071}, {"county": "高雄市", "det_new": 315.4, "approved_mw": 1583.4, "ha_per_mw": 0.199}, {"county": "臺東縣", "det_new": 16.1, "approved_mw": 101.9, "ha_per_mw": 0.158}, {"county": "花蓮縣", "det_new": 66.0, "approved_mw": 254.4, "ha_per_mw": 0.259}, {"county": "澎湖縣", "det_new": 0.5, "approved_mw": 77.4, "ha_per_mw": 0.006}, {"county": "新竹市", "det_new": 4.1, "approved_mw": 54.7, "ha_per_mw": 0.075}, {"county": "新竹縣", "det_new": 27.3, "approved_mw": 210.4, "ha_per_mw": 0.13}, {"county": "屏東縣", "det_new": 271.3, "approved_mw": 1783.9, "ha_per_mw": 0.152}], "national": [{"year": 2017, "det_pv": 125.1, "cap_mw": 1767.7, "approved_mw": 1203.8}, {"year": 2018, "det_pv": 261.8, "cap_mw": 2738.1, "approved_mw": 1854.3}, {"year": 2019, "det_pv": 503.8, "cap_mw": 4149.5, "approved_mw": 2170.7}, {"year": 2020, "det_pv": 721.6, "cap_mw": 5817.2, "approved_mw": 2766.0}, {"year": 2021, "det_pv": 1354.0, "cap_mw": 7700.2, "approved_mw": 2403.9}, {"year": 2022, "det_pv": 2143.7, "cap_mw": 9723.7, "approved_mw": 4103.4}, {"year": 2023, "det_pv": 2489.8, "cap_mw": 12417.7, "approved_mw": 2164.2}, {"year": 2024, "det_pv": 3475.3, "cap_mw": 14281.1, "approved_mw": 2004.1}, {"year": 2025, "det_pv": 3637.1, "cap_mw": 15474.0, "approved_mw": 1513.3}]};
+const REF = [2017];
+const N = V.national;
+new Chart(document.getElementById('cNat'), {
+  data: { labels: N.map(r => r.year), datasets: [
+    { type: 'line', label: '偵測光電面積（公頃）', data: N.map(r => r.det_pv), borderColor: '#7b2cbf', yAxisID: 'y',
+      pointBackgroundColor: N.map(r => REF.includes(r.year) ? '#bbb' : '#7b2cbf') },
+    { type: 'line', label: '累計裝置容量 (MW)', data: N.map(r => r.cap_mw), borderColor: '#e67e22', yAxisID: 'y2' },
+    { type: 'bar', label: '當年同意備案 (MW)', data: N.map(r => r.approved_mw), backgroundColor: 'rgba(230,126,34,.25)', yAxisID: 'y2' } ]},
+  options: { maintainAspectRatio: false, scales: {
+    y: { position: 'left', title: { display: true, text: '公頃' }, beginAtZero: true },
+    y2: { position: 'right', title: { display: true, text: 'MW' }, grid: { drawOnChartArea: false }, beginAtZero: true } } }
+});
+const TT = V.towns.towns.filter(t => t.plant_land > 0 || t.det > 5);
+new Chart(document.getElementById('cTown'), {
+  type: 'scatter',
+  data: { datasets: [{ label: '鄉鎮', data: TT.map(t => ({ x: t.plant_land, y: t.det, n: `${t.county}${t.town}` })),
+                       backgroundColor: 'rgba(59,82,139,.6)' }] },
+  options: { maintainAspectRatio: false, plugins: { legend: { display: false },
+    tooltip: { callbacks: { label: c => `${c.raw.n}：案場土地 ${c.raw.x.toFixed(0)} 公頃，偵測 ${c.raw.y.toFixed(0)} 公頃` } } },
+    scales: { x: { title: { display: true, text: '能源署電業級案場土地（公頃）' } }, y: { title: { display: true, text: '本站偵測新增光電（公頃）' } } } }
+});
+const opt = { perPage: 15, searchable: true, labels: { placeholder: '搜尋…', perPage: '每頁', noRows: '無資料', info: '第 {start}–{end} 筆，共 {rows} 筆' } };
+new simpleDatatables.DataTable('#tC', { ...opt, columns: [{ select: [1,2,3], type: 'number' }, { select: 1, sort: 'desc' }] });
+new simpleDatatables.DataTable('#tT', { ...opt, columns: [{ select: [2,3,4,5,6,7,8,9], type: 'number' }, { select: 3, sort: 'desc' }] });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>方法與限制 - 台灣樹冠與太陽光電變遷</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="static/site.css" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%226%22 r=%225%22 fill=%22%23227832%22/%3E%3Crect x=%227%22 y=%2210%22 width=%222%22 height=%225%22 fill=%22%23654%22/%3E%3C/svg%3E">
+  
+</head>
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-md navbar-dark bg-success-subtle border-bottom" style="background:#1f4d2b!important">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-tree-fill"></i> 樹冠 × 光電 觀測</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        
+        <li class="nav-item"><a class="nav-link " href="index.html">總覽</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="about.html">成果說明</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="map.html">互動地圖</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="counties.html">縣市統計</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="validation.html">驗證與圖資</a></li>
+        
+        <li class="nav-item"><a class="nav-link active fw-semibold" href="method.html">方法與限制</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="data.html">資料下載</a></li>
+        
+      </ul>
+      <span class="navbar-text small text-light opacity-75">分析期間 2018–2025</span>
+    </div>
+  </div>
+</nav>
+<main class="flex-grow-1 container py-4">
+
+<div class="row"><div class="col-lg-9">
+<h1 class="h4 fw-bold">方法與限制</h1>
+
+<h2 class="h5 mt-4">1. 資料來源</h2>
+<ul>
+  <li><b>衛星影像</b>：Copernicus Sentinel-2 Level-2A 地表反射率（10 m），與 BigGIS 平台建置的 Sentinel-2 影像同源。
+    BigGIS 的 Sentinel-2 圖磚清單 API 需申請 IP 開通，故本站改由 ESA 開放資料在 AWS 的 Cloud-Optimized GeoTIFF
+    （<a href="https://registry.opendata.aws/sentinel-2-l2a-cogs/" target="_blank">sentinel-2-l2a-cogs</a>，以 STAC 搜尋）直接讀取。</li>
+  <li><b>縣市界</b>：內政部直轄市、縣市界線（經 taiwan-atlas 簡化版）。</li>
+  <li><b>方法依據</b>：BigGIS〈<a href="https://gis.ardswc.gov.tw/image-variation-analysis/20" target="_blank">Sentinel-2 影像變異分析</a>〉
+    所述之決策樹分類（Liu et al. 2018；Liu et al. 2019, <i>Sci. Rep.</i> 9:7279）。</li>
+</ul>
+
+<h2 class="h5 mt-4">2. 年度去雲合成</h2>
+<p>台灣多雲，單張影像無法涵蓋全島。每個 Sentinel-2 圖幅（MGRS tile）每年挑選雲量最低的 15 景，
+以 L2A 內附的 SCL 場景分類遮去雲、雲影、卷雲、飽和與無資料像元，並以藍光反射率 &gt; 0.15 排除殘雲薄霧，
+對每個像元取各波段<b>中位數</b>，另外計算 NDVI 的年中位數與<b>第 25 百分位</b>。</p>
+
+<h2 class="h5 mt-4">3. 分類（BigGIS 決策樹 + 延伸）</h2>
+<table class="table table-sm small">
+  <thead><tr><th>指標</th><th>公式</th><th>用途</th></tr></thead>
+  <tbody>
+    <tr><td>NDVI</td><td>(NIR − Red)/(NIR + Red)</td><td>Level 1：植生 / 其它</td></tr>
+    <tr><td>SI 陰影指標</td><td>(PC1<sub>nor</sub> − I)(1 + S)/(PC1<sub>nor</sub> + I + S)</td><td>Level 2：陰影 / 非陰影（PC1 為 RGB 主成分，I、S 為 HSI 強度與飽和度）</td></tr>
+    <tr><td>Gn 綠度指標</td><td>(Green − Red)/(Green + Red)</td><td>Level 3：低植生 / 裸露地</td></tr>
+    <tr><td>MNDWI</td><td>(Green − SWIR1)/(Green + SWIR1)</td><td>水體（延伸）</td></tr>
+  </tbody>
+</table>
+<div class="alert alert-secondary small">
+  <b>與 BigGIS 的差異：</b>BigGIS 文章未公開各指標門檻與 SI 的輸入尺度；實測 SI 公式在 L2A 地表反射率上分母會跨越 0、數值不穩定，
+  因此陰影改以「非植生且 NIR &lt; 0.08、可見光平均 &lt; 0.04」判定。
+  山區地形陰影中的森林 NDVI 仍高（約 0.85），仍會被計入樹冠，不影響樹冠統計。NDVI 門檻以嘉南平原與中央山脈樣區人工校正。
+</div>
+<ul>
+  <li><b>樹冠</b>：年中位數 NDVI &gt; 0.7，且全年第 25 百分位 NDVI &gt; 0.6。
+    第二個條件用來排除稻田、蔬菜等有休耕 / 翻土期的季節性作物，只留下「整年都綠」的木本植被（森林、果園、竹林、行道樹等）。</li>
+  <li>10 m 解析度無法數出「棵數」，因此本站以<b>樹冠覆蓋面積（公頃）</b>作為「樹冠數量」的代理指標。</li>
+</ul>
+
+<h2 class="h5 mt-4">4. 疑似太陽能板</h2>
+<p>以台南七股漁電共生區（2024-01 影像）人工校正，太陽能板的光譜特徵很明確：近紅外（B8 ≈ 0.08）很低，
+短波紅外 SWIR1（B11 ≈ 0.26）卻很高，且藍光略高於紅光。魚塭水面的 SWIR1 極低（≈ 0.04），聚落建物的 SWIR1/NIR 差異也小得多，因此可以有效區分：</p>
+<pre class="bg-light p-2 small">NDVI &lt; 0.2  且  (B11 − B8)/(B11 + B8) &gt; 0.3
+且  (B2 − B4)/(B2 + B4) &gt; 0.0  且  B8 &lt; 0.16  且  B11 &gt; 0.12
+3×3 形態學閉運算（補面板列間空隙）後，連通區塊 ≥ 20 像元（0.2 公頃）</pre>
+<p class="small text-muted">抽查：彰濱工業區、嘉義布袋、台南七股的大型地面 / 漁電共生案場，區塊內約 75–90% 像元被偵測到；小於 0.2 公頃的屋頂型光電與零散案場大多偵測不到，因此光電面積應視為<b>下限</b>。</p>
+
+<h2 class="h5 mt-4">5. 逐像元時間序列（2018–2025）</h2>
+<p>兩兩年份直接相減會被雲、物候、門檻邊緣像元放大雜訊，因此對每個 10 m 像元的逐年類別序列做判斷。
+<b>統計以 2018 為基準年</b>（分析年份 2018、2019、2020、2021、2022、2023、2024、2025）；2017 只有 Sentinel-2A 一顆衛星，觀測少、樹冠系統性低估，
+只當參考資料顯示在各年面積與分類地圖，不參與以下判斷。</p>
+<ul>
+  <li><b>光電完工年</b>：第一個「該年為太陽能板，且下一年仍為太陽能板（或下一年無資料 / 已是最後一年）」的年份。單一年份的誤判不會被計入。
+    2018 已是太陽能板者視為「2018 以前已存在」，不計入新增。</li>
+  <li><b>光電前身</b>：看完工年之前（基準年起）的有效年份，依序判斷：
+    <ol class="mb-1">
+      <li><b>樹冠</b>：過半數年份為樹冠（涵蓋「砍樹 → 整地裸露一兩年 → 完工」）—— 即「砍樹光電」</li>
+      <li><b>水體</b>：≥ 1/3 年份為水體（魚塭、鹽田、埤塘會週期性放乾，不要求過半）—— 漁電共生、水面型光電</li>
+      <li><b>農地 / 低植生</b>：低植生年數 ≥ 裸露地年數（平手算農地，因整地多半是施工的一部分）—— 農地種電</li>
+      <li><b>裸露地 / 建物</b>：其餘（含長期整地、乾鹽田、工業區、屋頂）</li>
+    </ol></li>
+  <li><b>砍樹光電案場</b>：連通的光電區塊（≥ 0.2 公頃）中，原為樹冠的面積 ≥ 30%。</li>
+  <li><b>樹冠明確消失</b>：最近一次有效觀測為樹冠，該年轉為裸露地/建物/光電/水體，且下一年沒有恢復為樹冠。
+    含崩塌、農地整地、伐採、開發等所有原因；轉為「低植生」的不計（多為季節或門檻雜訊）。</li>
+  <li><b>各年樹冠 / 光電面積</b>：有效像元中的比例 × 縣市面積，減少各年雲遮程度不同造成的偏差。</li>
+</ul>
+
+<h3 class="h6 mt-3">「先砍樹、空窗、再蓋光電」路徑分析</h3>
+<p>「砍樹光電」只算完工前多數年份是樹的像元；空窗期較長時會被歸為農地或裸露地。因此另外對每個新增光電像元的完整序列分層：</p>
+<ol>
+  <li><b>多數年份是樹</b>：即本站主要數字。</li>
+  <li><b>先砍樹、空窗多年再蓋</b>：分析年份中 ≥ 2 年是樹，最後一次是樹之後到完工都不是樹；記錄空窗年數與空窗期類別。</li>
+  <li><b>基準年前已砍除</b>：分析年份從未是樹，只有參考年 2017 是樹。</li>
+  <li><b>只有 1 年是樹</b>：證據弱，多為分類雜訊。</li>
+</ol>
+<p>結果：完工前多數年份是樹 94.4 公頃、先砍樹、空窗多年再蓋 32.5 公頃、2018 年以前就已砍除 16.6 公頃、只有 1 年被判為樹 76.7 公頃；
+空窗多為 3–6 年。此層級無法區分砍樹的原因（例如砍樹蓋工廠、之後屋頂裝光電）。</p>
+
+<h2 class="h5 mt-4">6. 第二階段：外部圖資與驗證</h2>
+<ul>
+  <li><b>能源署電業級案場</b>（取得施工許可、≥ 2 MW，108–113 年，419 案）：地號無法以開放 API 轉座標，以鄉鎮為單位比對土地面積與偵測面積。</li>
+  <li><b>同意備案容量 / 累計裝置容量</b>：縣市、全國尺度比對（含屋頂型，衛星看不到）。</li>
+  <li><b>地形</b>：Copernicus DEM 30 m，σ = 60 m 平滑後逐像元計算坡度；山坡地以法定定義「標高 ≥ 100 m 或坡度 ≥ 5%」推估，
+    以非六都官方山坡地範圍圖檢核（案場層級 precision 0.60、recall 0.85）。</li>
+  <li><b>國有林事業區</b>：林業保育署 1141 版。</li>
+</ul>
+<p>詳見 <a href="validation.html">驗證與圖資</a>。</p>
+
+<h2 class="h5 mt-4">7. 已知限制</h2>
+<ul>
+  <li>2017 年只有 Sentinel-2A 為主（2B 於 2017-03 發射），可用景數較少，山區去雲後仍可能有空洞。</li>
+  <li>工業區大型屋頂、電廠內設施型光電（如能源署清單中的台中龍井、高雄小港）土地面積大但面板分散，衛星偵測面積遠低於案場土地。</li>
+  <li>最後一年（2025）完工的光電只有一年觀測，無法以隔年確認，誤判機率較高。</li>
+  <li>10 m 像元對小型屋頂型光電、零星砍伐偵測力有限；深藍色金屬屋頂、部分溫室可能被誤判為太陽能板，應搭配右側正射影像目視確認。</li>
+  <li>「樹冠消失」包含颱風崩塌、農地整地、伐採更新等，不全是光電所致；只有「樹冠 → 疑似太陽能板」才直接對應光電。</li>
+
+  <li>SI 門檻、NDVI 門檻為全台單一值，未針對地形陰影與不同季節做逐區校正。</li>
+</ul>
+
+<h2 class="h5 mt-4">8. 參數</h2>
+<pre class="bg-light p-2 small">{
+  &#34;T_NDVI&#34;: 0.7,
+  &#34;T_NDVI_P25&#34;: 0.6,
+  &#34;SHADOW_NIR_MAX&#34;: 0.08,
+  &#34;SHADOW_VIS_MAX&#34;: 0.04,
+  &#34;T_GN&#34;: 0.0,
+  &#34;T_MNDWI&#34;: 0.1,
+  &#34;PV_NDVI_MAX&#34;: 0.2,
+  &#34;PV_SWIR_NIR_MIN&#34;: 0.3,
+  &#34;PV_BLUE_RED_MIN&#34;: 0.0,
+  &#34;PV_NIR_MAX&#34;: 0.16,
+  &#34;PV_SWIR_MIN&#34;: 0.12,
+  &#34;PV_MIN_PIXELS&#34;: 20
+}</pre>
+</div></div>
+
+</main>
+
+<footer class="border-top py-3 small text-muted">
+  <div class="container">
+    影像：Copernicus Sentinel-2 L2A（ESA，經 AWS Open Data / Element84 Earth Search）；
+    分類方法參考 <a href="https://gis.ardswc.gov.tw/image-variation-analysis/20" target="_blank">農業部農村水保署 BigGIS Sentinel-2 影像變異分析</a>；
+    縣市界：內政部（<a href="https://github.com/dkaoster/taiwan-atlas" target="_blank">taiwan-atlas</a>）。
+    原始碼：<a href="https://github.com/richliu/treecrowns" target="_blank">github.com/richliu/treecrowns</a>。
+    產製時間 2026-09-27 19:37。本站為實驗性分析，數據僅供參考。<br>單位：1 公頃 = 10,000 平方公尺（100 m × 100 m）≈ 3,025 坪 ≈ 1.03 甲 ≈ 1.4 個標準足球場；大安森林公園約 26 公頃。
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

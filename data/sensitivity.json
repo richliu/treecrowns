@@ -1,0 +1,197 @@
+{
+ "defs": [
+  {
+   "key": "strict",
+   "label": "嚴格樹冠（NDVI 中位數 > 0.7 且 P25 > 0.6，本站主要定義）"
+  },
+  {
+   "key": "woody",
+   "label": "寬鬆木本（> 0.6 且 P25 > 0.5，含果園、檳榔、竹林）"
+  },
+  {
+   "key": "veg",
+   "label": "任何植被（NDVI 中位數 > 0.5，含農作物）"
+  },
+  {
+   "key": "bare_water",
+   "label": "水體 / 裸露地（NDVI 中位數 < 0.2）"
+  }
+ ],
+ "total": {
+  "pv_new": 3866.0,
+  "strict": 87.5,
+  "woody": 179.8,
+  "veg": 405.4,
+  "bare_water": 2635.6
+ },
+ "counties": [
+  {
+   "name": "宜蘭縣",
+   "pv_new": 13.2,
+   "strict": 1.0,
+   "woody": 1.4,
+   "veg": 1.9,
+   "bare_water": 8.6
+  },
+  {
+   "name": "彰化縣",
+   "pv_new": 753.9,
+   "strict": 2.2,
+   "woody": 4.4,
+   "veg": 11.0,
+   "bare_water": 661.9
+  },
+  {
+   "name": "南投縣",
+   "pv_new": 17.0,
+   "strict": 0.6,
+   "woody": 1.2,
+   "veg": 2.7,
+   "bare_water": 10.5
+  },
+  {
+   "name": "雲林縣",
+   "pv_new": 380.2,
+   "strict": 2.4,
+   "woody": 29.9,
+   "veg": 96.6,
+   "bare_water": 123.8
+  },
+  {
+   "name": "基隆市",
+   "pv_new": 0.3,
+   "strict": 0.0,
+   "woody": 0.0,
+   "veg": 0.0,
+   "bare_water": 0.3
+  },
+  {
+   "name": "台北市",
+   "pv_new": 1.8,
+   "strict": 0.0,
+   "woody": 0.0,
+   "veg": 0.0,
+   "bare_water": 1.4
+  },
+  {
+   "name": "新北市",
+   "pv_new": 19.4,
+   "strict": 0.7,
+   "woody": 0.9,
+   "veg": 1.5,
+   "bare_water": 16.0
+  },
+  {
+   "name": "台中市",
+   "pv_new": 94.4,
+   "strict": 0.2,
+   "woody": 0.5,
+   "veg": 1.5,
+   "bare_water": 76.4
+  },
+  {
+   "name": "台南市",
+   "pv_new": 1237.1,
+   "strict": 2.4,
+   "woody": 22.0,
+   "veg": 106.6,
+   "bare_water": 862.7
+  },
+  {
+   "name": "桃園市",
+   "pv_new": 122.4,
+   "strict": 0.8,
+   "woody": 1.7,
+   "veg": 4.0,
+   "bare_water": 100.9
+  },
+  {
+   "name": "苗栗縣",
+   "pv_new": 42.4,
+   "strict": 0.3,
+   "woody": 2.2,
+   "veg": 5.1,
+   "bare_water": 28.0
+  },
+  {
+   "name": "嘉義市",
+   "pv_new": 3.3,
+   "strict": 0.0,
+   "woody": 0.0,
+   "veg": 0.1,
+   "bare_water": 2.3
+  },
+  {
+   "name": "嘉義縣",
+   "pv_new": 477.8,
+   "strict": 2.4,
+   "woody": 3.8,
+   "veg": 11.3,
+   "bare_water": 334.4
+  },
+  {
+   "name": "金門縣",
+   "pv_new": 2.3,
+   "strict": 0.0,
+   "woody": 0.0,
+   "veg": 0.1,
+   "bare_water": 1.8
+  },
+  {
+   "name": "高雄市",
+   "pv_new": 315.4,
+   "strict": 1.8,
+   "woody": 6.7,
+   "veg": 12.7,
+   "bare_water": 244.4
+  },
+  {
+   "name": "台東縣",
+   "pv_new": 16.1,
+   "strict": 2.7,
+   "woody": 3.7,
+   "veg": 4.1,
+   "bare_water": 11.2
+  },
+  {
+   "name": "花蓮縣",
+   "pv_new": 66.0,
+   "strict": 37.6,
+   "woody": 38.0,
+   "veg": 38.4,
+   "bare_water": 23.9
+  },
+  {
+   "name": "澎湖縣",
+   "pv_new": 0.5,
+   "strict": 0.0,
+   "woody": 0.0,
+   "veg": 0.0,
+   "bare_water": 0.5
+  },
+  {
+   "name": "新竹市",
+   "pv_new": 4.1,
+   "strict": 0.5,
+   "woody": 1.1,
+   "veg": 1.4,
+   "bare_water": 2.3
+  },
+  {
+   "name": "新竹縣",
+   "pv_new": 27.3,
+   "strict": 0.0,
+   "woody": 0.1,
+   "veg": 1.4,
+   "bare_water": 23.0
+  },
+  {
+   "name": "屏東縣",
+   "pv_new": 271.3,
+   "strict": 32.0,
+   "woody": 62.1,
+   "veg": 105.1,
+   "bare_water": 101.4
+  }
+ ]
+}

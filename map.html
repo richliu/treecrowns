@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>互動地圖 - 台灣樹冠與太陽光電變遷</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="static/site.css" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%226%22 r=%225%22 fill=%22%23227832%22/%3E%3Crect x=%227%22 y=%2210%22 width=%222%22 height=%225%22 fill=%22%23654%22/%3E%3C/svg%3E">
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  #map { position:absolute; inset:0; }
+  .panel { background:#fff; padding:8px 10px; border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.3); font-size:12px; line-height:1.6; max-width:260px }
+  .panel i { display:inline-block; width:14px; height:14px; margin-right:4px; vertical-align:-2px; border:1px solid #0002 }
+  .ramp span { display:inline-block; width:22px; height:10px }
+  .ramp small { display:inline-block; width:22px; text-align:center; font-size:9px }
+</style>
+
+</head>
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-md navbar-dark bg-success-subtle border-bottom" style="background:#1f4d2b!important">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-tree-fill"></i> 樹冠 × 光電 觀測</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        
+        <li class="nav-item"><a class="nav-link " href="index.html">總覽</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="about.html">成果說明</a></li>
+        
+        <li class="nav-item"><a class="nav-link active fw-semibold" href="map.html">互動地圖</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="counties.html">縣市統計</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="validation.html">驗證與圖資</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="method.html">方法與限制</a></li>
+        
+        <li class="nav-item"><a class="nav-link " href="data.html">資料下載</a></li>
+        
+      </ul>
+      <span class="navbar-text small text-light opacity-75">分析期間 2018–2025</span>
+    </div>
+  </div>
+</nav>
+<main class="flex-grow-1 position-relative">
+<div id="map"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-hash@0.2.1/leaflet-hash.min.js"></script>
+<script>
+const YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], REF = [2017], CLASS_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], RAMP = {"pvyear": ["#440154", "#401e68", "#3d3b7c", "#38578b", "#2f6e8b", "#25858b", "#2c9b84", "#42af75"], "tree2pv": ["#78001e", "#930026", "#ae002e", "#c90036", "#df0836", "#e82026", "#f23915", "#fb5105"], "treeloss": ["#783200", "#8c3c00", "#a04700", "#b45200", "#c85d00", "#dc6800", "#e87508", "#ec8318"]};
+const TREE_FRAC = 0.3, BASE = 2018;
+const PRED = [["water", "\u6c34\u9ad4\uff08\u9b5a\u586d/\u9e7d\u7530/\u57e4\u5858\uff09", "#1e90ff"], ["farm", "\u8fb2\u5730/\u4f4e\u690d\u751f", "#f0be00"], ["bare", "\u88f8\u9732\u5730/\u5efa\u7269", "#966e50"], ["tree", "\u6a39\u51a0\uff08\u780d\u6a39\u5149\u96fb\uff09", "#dc003c"]], PCOL = Object.fromEntries(PRED.map(p => [p[0], p[2]])), PNAME = Object.fromEntries(PRED.map(p => [p[0], p[1]]));
+const map = L.map('map', { center: [23.7, 120.95], zoom: 8, maxZoom: 19 });
+new L.Hash(map);
+
+const eox = y => L.tileLayer(`https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-${y}_3857/default/g/{z}/{y}/{x}.jpg`,
+  { maxZoom: 19, maxNativeZoom: 15, attribution: `Sentinel-2 cloudless ${y} by EOX (Copernicus Sentinel data)` });
+const base = {
+  '國土測繪中心 正射影像（最新）': L.tileLayer('https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}',
+      { maxZoom: 19, attribution: '內政部國土測繪中心' }),
+  '國土測繪中心 臺灣通用電子地圖': L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}',
+      { maxZoom: 19, attribution: '內政部國土測繪中心' }),
+  'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
+};
+[2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024].forEach(y => base[`Sentinel-2 cloudless ${y}（EOX）`] = eox(y));
+base['國土測繪中心 正射影像（最新）'].addTo(map);
+
+const tl = name => L.tileLayer(`tiles/${name}/{z}/{x}/{y}.png`, { minZoom: 5, maxNativeZoom: 13, maxZoom: 19, opacity: 0.8 });
+const overlays = {};
+overlays['分類（年份見左上）'] = tl(`class_${CLASS_YEARS[CLASS_YEARS.length - 1]}`);
+overlays['光電前身（像元：水體/農地/裸露/樹冠）'] = tl('pvpred').addTo(map);
+overlays['光電完工年（像元）'] = tl('pvyear');
+overlays['砍樹光電（像元，依完工年）'] = tl('tree2pv');
+overlays['樹冠明確消失（像元，依年份）'] = tl('treeloss');
+
+const fmt = n => (n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 1 });
+const pct = v => v == null ? '—' : `${Math.round(v * 100)}%`;
+const siteLayer = L.geoJSON(null, {
+  style: f => { const p = f.properties, isNew = p.year > BASE;
+    return { color: isNew ? (PCOL[p.type] || '#999') : '#666', weight: p.type === 'tree' ? 2.5 : 1.2,
+             dashArray: isNew ? null : '3', fillOpacity: 0.08 }; },
+  onEachFeature: (f, l) => { const p = f.properties, isNew = p.year > BASE;
+    const rows = isNew ? PRED.map(([k, n, c]) => `<span style="color:${c}">■</span> ${n}：${fmt(p[k + '_ha'])} 公頃`).join('<br>') : '';
+    l.bindPopup(
+    `<b>疑似光電案場</b>（${p.county ?? '—'} ${p.town ?? ''}）<br>` +
+    (isNew ? `完工年：${p.year}` : `${BASE} 以前已存在`) +
+    `${p.year === YEARS[YEARS.length-1] ? '<br><span class="text-danger">⚠ 僅最後一年偵測到，尚未經隔年確認</span>' : ''}<br>` +
+    `面積：${fmt(p.area_ha)} 公頃${isNew ? '<br><b>蓋之前：</b><br>' + rows : ''}<br>` +
+    `<hr class="my-1">標高 ${p.elev ?? '—'} m、坡度 ${p.slope ?? '—'}%<br>` +
+    `山坡地（DEM 推估）${pct(p.slopeland_dem)}、官方山坡地 ${p.slopeland_off == null ? '六都無資料' : pct(p.slopeland_off)}<br>` +
+    `國有林事業區 ${pct(p.nat_forest)}<br><a href="#17/${p.lat}/${p.lon}">放大</a>`); }
+});
+let siteData = null;
+const siteFilter = { v: 'all' };
+function refreshSites() { siteLayer.clearLayers(); if (siteData) siteLayer.addData({ type: 'FeatureCollection',
+  features: siteData.features.filter(f => siteFilter.v === 'all' || (f.properties.year > BASE && f.properties.type === siteFilter.v)) }); }
+fetch('data/pv_sites.geojson').then(r => r.json()).then(d => { siteData = d; refreshSites(); });
+overlays['疑似光電案場（外框顏色 = 前身）'] = siteLayer.addTo(map);
+
+const counties = L.geoJSON(null, {
+  style: { color: '#333', weight: 1, fill: false, dashArray: '3' },
+  onEachFeature: (f, l) => { const p = f.properties; l.bindPopup(
+    `<b>${p.name}</b><br>樹冠比例 ${YEARS[0]}：${p.tree_pct0}% → ${YEARS[YEARS.length-1]}：${p.tree_pctN}%<br>` +
+    `新增疑似光電（${BASE + 1}–${YEARS[YEARS.length-1]}）：${fmt(p.pv_new_total)} 公頃<br>` +
+    PRED.map(([k, n, c]) => `<span style="color:${c}">■</span> ${n}：${fmt(p['pv_' + k])} 公頃`).join('<br>') +
+    `<br>樹冠明確消失：${fmt(p.tree_loss_total)} 公頃<br>` +
+    `<a href="counties.html">縣市統計 →</a>`); }
+});
+fetch('data/counties.geojson').then(r => r.json()).then(d => counties.addData(d));
+overlays['縣市界'] = counties.addTo(map);
+L.control.layers(base, overlays, { collapsed: true }).addTo(map);
+L.control.scale({ imperial: false }).addTo(map);
+
+// 左上：分類年份、透明度、只看砍樹案場
+const ctl = L.control({ position: 'topleft' });
+ctl.onAdd = () => { const d = L.DomUtil.create('div', 'panel');
+  d.innerHTML = `分類年份 <select id="yr">${CLASS_YEARS.map(y => `<option value="${y}" ${y === CLASS_YEARS[CLASS_YEARS.length-1] ? 'selected' : ''}>${y}${REF.includes(y) ? '（參考）' : ''}</option>`).join('')}</select><br>` +
+    `圖層透明度 <input id="op" type="range" min="0" max="100" value="80" style="width:90px;vertical-align:middle"><br>` +
+    `案場 <select id="ot"><option value="all">全部</option>${PRED.map(([k, n]) => `<option value="${k}">新增：原為${n.split('（')[0]}</option>`).join('')}</select>`;
+  L.DomEvent.disableClickPropagation(d);
+  d.querySelector('#yr').onchange = e => overlays['分類（年份見左上）'].setUrl(`tiles/class_${e.target.value}/{z}/{x}/{y}.png`);
+  d.querySelector('#op').oninput = e => Object.values(overlays).forEach(l => l.setOpacity && l.setOpacity(e.target.value / 100));
+  d.querySelector('#ot').onchange = e => { siteFilter.v = e.target.value; refreshSites(); };
+  return d; };
+ctl.addTo(map);
+
+const ramp = k => `<div class="ramp">${YEARS.map((y, i) => `<span style="background:${RAMP[k][i]}"></span>`).join('')}<br>` +
+  `${YEARS.map(y => `<small>${String(y).slice(2)}</small>`).join('')}</div>`;
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = () => { const d = L.DomUtil.create('div', 'panel'); d.innerHTML =
+  `<b>光電前身 / 案場外框</b><br>` + PRED.map(([k, n, c]) => `<i style="background:${c}"></i>${n}`).join('<br>') +
+  `<br><span style="color:#666">- - -</span> ${BASE} 以前已存在<hr class="my-1">` +
+  `<b>砍樹光電（完工年）</b>${ramp('tree2pv')}<b>光電完工年</b>${ramp('pvyear')}` +
+  `<b>樹冠明確消失年</b>${ramp('treeloss')}<hr class="my-1"><b>分類</b><br>` +
+  `<i style="background:#227832"></i>樹冠 <i style="background:#aad26e"></i>低植生/農地<br>` +
+  `<i style="background:#c8b496"></i>裸露地/建物 <i style="background:#3c78dc"></i>水體<br>` +
+  `<i style="background:#505050"></i>陰影 <i style="background:#e600e6"></i>疑似太陽能板`; return d; };
+legend.addTo(map);
+</script>
+
+</body>
+</html>

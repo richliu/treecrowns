@@ -1,0 +1,221 @@
+{
+ "baseline": 2018,
+ "analysis_years": [
+  2018,
+  2019,
+  2020,
+  2021,
+  2022,
+  2023,
+  2024,
+  2025
+ ],
+ "reference_years": [
+  2017
+ ],
+ "total": {
+  "majority": 94.4,
+  "cleared": 32.5,
+  "ref2017": 16.6,
+  "once": 76.7,
+  "never": 3645.7
+ },
+ "cleared_gap_years": {
+  "1": 0.4,
+  "2": 2.3,
+  "3": 8.4,
+  "4": 9.0,
+  "5": 4.9,
+  "6": 7.3
+ },
+ "cleared_by_last_tree_year": {
+  "2019": 11.3,
+  "2020": 7.8,
+  "2021": 6.0,
+  "2022": 6.8,
+  "2023": 0.7,
+  "2024": 0.1
+ },
+ "cleared_by_install_year": {
+  "2023": 5.8,
+  "2024": 5.2,
+  "2025": 21.5
+ },
+ "cleared_between_classes": {
+  "陰影": 1.5,
+  "低植生": 58.9,
+  "裸露地/建物": 23.8,
+  "水體": 12.5,
+  "光電": 3.3
+ },
+ "counties": [
+  {
+   "name": "宜蘭縣",
+   "majority": 1.2,
+   "cleared": 0.7,
+   "ref2017": 0.2,
+   "once": 0.5,
+   "never": 10.5
+  },
+  {
+   "name": "彰化縣",
+   "majority": 2.6,
+   "cleared": 1.1,
+   "ref2017": 0.1,
+   "once": 10.2,
+   "never": 739.8
+  },
+  {
+   "name": "南投縣",
+   "majority": 0.5,
+   "cleared": 0.6,
+   "ref2017": 0.1,
+   "once": 1.2,
+   "never": 14.4
+  },
+  {
+   "name": "雲林縣",
+   "majority": 2.6,
+   "cleared": 1.7,
+   "ref2017": 0.3,
+   "once": 7.2,
+   "never": 368.4
+  },
+  {
+   "name": "基隆市",
+   "majority": 0.0,
+   "cleared": 0.0,
+   "ref2017": 0.0,
+   "once": 0.0,
+   "never": 0.3
+  },
+  {
+   "name": "台北市",
+   "majority": 0.0,
+   "cleared": 0.0,
+   "ref2017": 0.0,
+   "once": 0.0,
+   "never": 1.8
+  },
+  {
+   "name": "新北市",
+   "majority": 0.7,
+   "cleared": 0.0,
+   "ref2017": 0.0,
+   "once": 0.1,
+   "never": 18.6
+  },
+  {
+   "name": "台中市",
+   "majority": 0.2,
+   "cleared": 0.2,
+   "ref2017": 0.1,
+   "once": 0.9,
+   "never": 93.0
+  },
+  {
+   "name": "台南市",
+   "majority": 3.9,
+   "cleared": 1.6,
+   "ref2017": 4.6,
+   "once": 16.1,
+   "never": 1211.0
+  },
+  {
+   "name": "桃園市",
+   "majority": 1.9,
+   "cleared": 1.7,
+   "ref2017": 0.6,
+   "once": 4.4,
+   "never": 113.8
+  },
+  {
+   "name": "苗栗縣",
+   "majority": 1.1,
+   "cleared": 0.4,
+   "ref2017": 0.1,
+   "once": 2.1,
+   "never": 38.7
+  },
+  {
+   "name": "嘉義市",
+   "majority": 0.0,
+   "cleared": 0.0,
+   "ref2017": 0.0,
+   "once": 0.0,
+   "never": 3.2
+  },
+  {
+   "name": "嘉義縣",
+   "majority": 2.5,
+   "cleared": 0.6,
+   "ref2017": 0.9,
+   "once": 1.2,
+   "never": 472.6
+  },
+  {
+   "name": "金門縣",
+   "majority": 0.0,
+   "cleared": 0.0,
+   "ref2017": 0.0,
+   "once": 0.0,
+   "never": 2.2
+  },
+  {
+   "name": "高雄市",
+   "majority": 1.9,
+   "cleared": 2.2,
+   "ref2017": 2.1,
+   "once": 3.0,
+   "never": 306.2
+  },
+  {
+   "name": "台東縣",
+   "majority": 2.6,
+   "cleared": 0.9,
+   "ref2017": 0.1,
+   "once": 0.5,
+   "never": 12.0
+  },
+  {
+   "name": "花蓮縣",
+   "majority": 37.6,
+   "cleared": 0.2,
+   "ref2017": 0.5,
+   "once": 2.1,
+   "never": 25.5
+  },
+  {
+   "name": "澎湖縣",
+   "majority": 0.0,
+   "cleared": 0.0,
+   "ref2017": 0.0,
+   "once": 0.0,
+   "never": 0.5
+  },
+  {
+   "name": "新竹市",
+   "majority": 0.5,
+   "cleared": 0.3,
+   "ref2017": 0.0,
+   "once": 0.1,
+   "never": 3.1
+  },
+  {
+   "name": "新竹縣",
+   "majority": 0.0,
+   "cleared": 0.2,
+   "ref2017": 0.0,
+   "once": 1.1,
+   "never": 26.0
+  },
+  {
+   "name": "屏東縣",
+   "majority": 34.5,
+   "cleared": 20.0,
+   "ref2017": 6.7,
+   "once": 25.9,
+   "never": 184.2
+  }
+ ]
+}
