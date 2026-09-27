@@ -1,0 +1,10 @@
+.venv/
+data/
+logs/
+public/
+slides-src/node_modules/
+slides-src/package-lock.json
+.playwright-mcp/
+__pycache__/
+*.pyc
+NOTES.local.md

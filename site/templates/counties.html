@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}縣市統計 - 台灣樹冠與太陽光電變遷{% endblock %}
+{% block head %}<link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">{% endblock %}
+{% block content %}
+<h1 class="h4 fw-bold">縣市統計 {{ y1 }}–{{ y2 }}</h1>
+<p class="small text-secondary">面積單位：公頃。「新增光電」與其前身為 {{ y1|int + 1 }}–{{ y2 }} 累計（{{ y1 }} 為基準年）；
+「最低涵蓋率」= 分析年份中有效（非雲、非無資料）像元比例的最小值。點選縣市名稱可看逐年趨勢。</p>
+
+<div class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <h2 class="h6 fw-bold" id="ctitle">全台</h2>
+  <div style="height:320px"><canvas id="chartC"></canvas></div>
+</div></div>
+
+<div class="table-responsive">
+<table id="tbl" class="table table-sm table-striped small">
+  <thead><tr>
+    <th>縣市</th><th>新增光電</th>
+    {% for k, n, col in pred %}<th><span style="color:{{ col }}">■</span> {{ n.split("（")[0] }}→光電</th>{% endfor %}
+    <th>砍樹佔新增</th><th>樹冠比例 {{ y1 }}</th><th>樹冠比例 {{ y2 }}</th><th>樹冠明確消失</th><th>最低涵蓋率</th>
+  </tr></thead>
+  <tbody>
+  {% for c in counties %}
+  <tr>
+    <td><a href="#" class="cl" data-id="{{ c.id }}">{{ c.name }}</a></td>
+    <td data-sort="{{ c.pv_new_total }}" class="fw-semibold">{{ "{:,.1f}".format(c.pv_new_total) }}</td>
+    {% for k, n, col in pred %}<td data-sort="{{ c.pred_total[k] }}"{% if k == 'tree' %} class="fw-bold text-danger"{% endif %}>{{ "{:,.1f}".format(c.pred_total[k]) }}</td>{% endfor %}
+    <td data-sort="{{ c.t2pv_share }}">{{ c.t2pv_share }}%</td>
+    <td data-sort="{{ c.tree_pct0 }}">{{ c.tree_pct0 }}%</td><td data-sort="{{ c.tree_pctN }}">{{ c.tree_pctN }}%</td>
+    <td data-sort="{{ c.tree_loss_total }}">{{ "{:,.0f}".format(c.tree_loss_total) }}</td>
+    <td data-sort="{{ c.valid_min }}">{{ c.valid_min }}%</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/umd/simple-datatables.min.js"></script>
+<script>
+const S = {{ summary_json|safe }};
+const PRED = {{ pred|tojson }};
+const Y = S.years.map(String), Yn = S.analysis_years.slice(1).map(String), REF = S.reference_years.map(String);
+let chart;
+function show(c) {
+  const src = c || { name: '全台', pred_install: S.total.pred_install, tree_loss: S.total.tree_loss,
+                     yearly: Object.fromEntries(Y.map(y => [y, { tree_pct: 100 * S.total.yearly[y].tree_est / S.total.area_ha }])) };
+  document.getElementById('ctitle').textContent = `${src.name}：逐年新增光電（依前身）與樹冠比例`;
+  chart && chart.destroy();
+  chart = new Chart(document.getElementById('chartC'), {
+    data: { labels: Y, datasets: [
+      ...PRED.map(([k, n, col]) => ({ type: 'bar', label: n, data: Y.map(y => Yn.includes(y) ? src.pred_install[y][k] : null), backgroundColor: col, stack: 'pv' })),
+      { type: 'bar', label: '樹冠明確消失', data: Y.map(y => Yn.includes(y) ? src.tree_loss[y] : null), backgroundColor: '#e67e22', stack: 'loss', hidden: true },
+      { type: 'line', label: '樹冠比例 (%)', data: Y.map(y => src.yearly[y].tree_pct), borderColor: '#227832', yAxisID: 'y2',
+        pointBackgroundColor: Y.map(y => REF.includes(y) ? '#bbb' : '#227832') } ]},
+    options: { maintainAspectRatio: false, scales: {
+      y: { stacked: true, title: { display: true, text: '公頃' } },
+      y2: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '樹冠 %' } } } }
+  });
+}
+show(null);
+new simpleDatatables.DataTable('#tbl', { perPage: 25, searchable: true,
+  columns: [{ select: [1,2,3,4,5,6,7,8,9,10], type: 'number' }, { select: 1, sort: 'desc' }],
+  labels: { placeholder: '搜尋縣市…', perPage: '每頁筆數', noRows: '無資料', info: '第 {start}–{end} 筆，共 {rows} 筆' } });
+document.getElementById('tbl').addEventListener('click', e => {
+  const a = e.target.closest('a.cl'); if (!a) return; e.preventDefault();
+  show(S.counties.find(c => c.id === a.dataset.id)); window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+{% endblock %}

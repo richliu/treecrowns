@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}成果說明 - 台灣太陽光電與樹冠變遷{% endblock %}
+{% block head %}
+<style>
+  .lead-num { font-size: 2.2rem; font-weight: 800; line-height: 1.1 }
+  .story h2 { font-size: 1.25rem; font-weight: 700; margin-top: 2.2rem; padding-bottom: .3rem; border-bottom: 2px solid #cfe3c7 }
+  .story p, .story li { line-height: 1.85 }
+  .bar { height: 26px; border-radius: 4px; display: flex; overflow: hidden }
+  .bar > div { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; white-space: nowrap }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-9 story">
+
+<h1 class="h3 fw-bold">太陽光電到底砍了多少樹？——用衛星照片算給你看</h1>
+<p class="text-secondary">白話版成果說明。數字皆為 {{ y1 }}（基準年）到 {{ y2 }} 的衛星判讀結果。
+<a href="{{ root }}slides/treecrowns.pptx"><i class="bi bi-file-earmark-slides"></i> 下載簡報（PowerPoint）</a></p>
+
+<div class="card border-0 shadow-sm my-4"><div class="card-body">
+  <div class="row text-center g-3">
+    <div class="col-md-4"><div class="small text-secondary">{{ y1|int + 1 }}–{{ y2 }} 新增的太陽能板</div>
+      <div class="lead-num text-primary">{{ "{:,.0f}".format(T.pv_new_total) }} 公頃</div>
+      <div class="small">{{ T.pv_new_total|eq }}</div></div>
+    <div class="col-md-4"><div class="small text-secondary">其中原本是樹林的</div>
+      <div class="lead-num text-danger">{{ "{:,.0f}".format(P.tree) }} 公頃</div>
+      <div class="small">{{ P.tree|eq }}，約佔 {{ "%.1f"|format(100 * P.tree / T.pv_new_total) }}%</div></div>
+    <div class="col-md-4"><div class="small text-secondary">原本是農地 + 魚塭鹽田的</div>
+      <div class="lead-num text-warning-emphasis">{{ "{:,.0f}".format(P.farm + P.water) }} 公頃</div>
+      <div class="small">約佔 {{ "%.0f"|format(100 * (P.farm + P.water) / T.pv_new_total) }}%</div></div>
+  </div>
+  <div class="bar mt-4">
+    {% for k, n, col in pred %}{% set v = P[k] %}
+    <div style="width:{{ 100 * v / T.pv_new_total }}%;background:{{ col }}" title="{{ n }} {{ '%.0f'|format(v) }} 公頃">{% if v / T.pv_new_total > 0.08 %}{{ n.split('（')[0] }} {{ "%.0f"|format(100 * v / T.pv_new_total) }}%{% endif %}</div>
+    {% endfor %}
+  </div>
+  <div class="small text-muted mt-1">新增太陽能板「蓋之前是什麼」：
+    {% for k, n, col in pred %}<span style="color:{{ col }}">■</span> {{ n }} {{ "{:,.0f}".format(P[k]) }} 公頃{% if not loop.last %}、{% endif %}{% endfor %}</div>
+</div></div>
+
+<div class="alert alert-light border"><b>「公頃」有多大？</b>
+  1 公頃 = 100 公尺 × 100 公尺 = 10,000 平方公尺，約 <b>3,025 坪</b>、<b>1.03 甲</b>，差不多是 <b>1.4 個標準足球場</b>。
+  台北的<b>大安森林公園約 26 公頃</b>，本頁常用它來比較。</div>
+
+<h2>1. 為什麼要做這件事？</h2>
+<p>台灣近年大力推動太陽光電，{{ y1 }} 年全國光電裝置容量約 2.7 GW，到 {{ y2 }} 年已超過 15 GW。
+新聞上時常看到「光電砍樹」「農地種電」「漁電共生」的爭議，但大多是個案，很少有人回答一個簡單的問題：
+<b>全台灣這幾年新蓋的太陽能板，原本到底是什麼地？砍了多少樹？</b></p>
+<p>農業部農村發展及水土保持署的 <a href="https://gis.ardswc.gov.tw/" target="_blank">BigGIS 巨量空間資訊系統</a>
+已經示範如何用 Sentinel-2 衛星影像、以植生指標（NDVI）判斷森林與裸露地的變化。本站沿用同一套想法，
+把它擴大到全台灣、每一年，並加上「辨認太陽能板」這一步。</p>
+
+<h2>2. 怎麼做的？（白話版）</h2>
+<ol>
+  <li><b>每年拍一張「沒有雲」的台灣照片。</b>歐洲太空總署的 Sentinel-2 衛星每 5 天拍一次台灣，但台灣多雲。
+    我們把每一年最清楚的 15 次照片疊起來，每個位置取「最常見的樣子」，拼出一張全台無雲照片。</li>
+  <li><b>把台灣切成 10 公尺 × 10 公尺的小格子</b>（約 3.7 億格），讓電腦判斷每一格是：樹、農地 / 草地、水、裸地 / 建物，還是太陽能板。
+    <ul>
+      <li>樹：一整年都很「綠」（植生指標高，連休耕季節也不掉）。</li>
+      <li>太陽能板：在衛星的「短波紅外線」特別亮、在「近紅外線」特別暗，和魚塭、房屋都不一樣。我們用台南七股、彰濱工業區等已知案場校正。</li>
+    </ul></li>
+  <li><b>一年一年追蹤每一格。</b>某一格第一次變成太陽能板、而且隔年還是，就算「這年蓋好」；
+    再往回看它蓋之前幾年是什麼：多數年份是樹 → 算「砍樹光電」；有 1/3 以上年份是水 → 魚塭 / 鹽田；其餘看是農地還是裸地較多。</li>
+  <li><b>和政府資料對照。</b>用經濟部能源署公開的光電案場清單、裝置容量統計，以及山坡地、國有林、地形資料檢查結果。</li>
+</ol>
+
+<h2>3. 發現了什麼？</h2>
+<ul>
+  <li><b>新增的太陽能板約一半蓋在農地上</b>（{{ "{:,.0f}".format(P.farm) }} 公頃，{{ P.farm|eq }}），
+    約三成蓋在<b>魚塭、鹽田、埤塘</b>等水面（{{ "{:,.0f}".format(P.water) }} 公頃）。</li>
+  <li><b>原本是樹林的只有約 {{ "{:,.0f}".format(P.tree) }} 公頃</b>（{{ P.tree|eq }}），佔新增的 {{ "%.1f"|format(100 * P.tree / T.pv_new_total) }}%。
+    {% if sens %}如果把果園、檳榔園、竹林也算成「樹」，約 {{ "{:,.0f}".format(sens.total.woody) }} 公頃；再寬鬆到「任何植被」也只有 {{ "{:,.0f}".format(sens.total.veg) }} 公頃。{% endif %}
+    所以「光電大規模砍樹」在全台尺度上並不成立，但<b>確實有局部案例</b>。</li>
+  <li><b>砍樹光電集中在花蓮與屏東。</b>最大的一處在花蓮鳳林、光復一帶的平地造林地（約 34 公頃）；
+    屏東則分散在佳冬、車城、恆春、獅子等地。</li>
+  <li><b>砍樹光電多數在平地，不在山坡地。</b>{% if V %}新增光電中位於山坡地的有 {{ V.sites.by_terrain.slopeland.n }} 處、
+    約 {{ "{:,.0f}".format(V.sites.by_terrain.slopeland.area) }} 公頃，其中原為樹林的約 {{ "{:,.0f}".format(V.sites.by_terrain.slopeland.tree) }} 公頃；
+    平地原為樹林的約 {{ "{:,.0f}".format(V.sites.by_terrain.flat.tree) }} 公頃。{% endif %}</li>
+  <li><b>縣市差異很大：</b>台南、彰化、嘉義、雲林新增最多；彰化大多是魚塭與濱海水面（彰濱），嘉義、雲林大多是農地。</li>
+  <li>另外，{{ y1|int + 1 }}–{{ y2 }} 全台約有 {{ "{:,.0f}".format(T.tree_loss_total) }} 公頃樹林「明確消失」（變成裸地、建物、水或光電），
+    其中<b>絕大多數與光電無關</b>，而是颱風崩塌、開發、伐採等，例如 2025 年花蓮馬太鞍溪一帶。</li>
+</ul>
+
+<h2>4. 這些數字可信嗎？</h2>
+<ul>
+  {% if V %}<li>和能源署公開的 {{ V.towns.plants_n }} 個大型（2 MW 以上）光電案場比對：以鄉鎮為單位，
+    案場土地面積與本站偵測面積的<b>相關係數 {{ V.towns.corr }}</b>，趨勢相當一致；全台偵測面積的成長曲線也和累計裝置容量同步。</li>{% endif %}
+  <li>用國土測繪中心的航空照片抽查大型案場，案場內約 75–90% 的格子有被抓到。</li>
+  <li>抽查「原為樹林」的案場，多數確實是樹林中蓋起太陽能板；誤判多出現在最後一年（{{ y2 }}）才出現、還沒有隔年確認的案例，網站上會標示「待確認」。</li>
+</ul>
+
+<h2>5. 研究限制（請務必一起看）</h2>
+<ul>
+  <li><b>看不到小型與屋頂型光電。</b>衛星一格 10 公尺，0.2 公頃以下的案場、住家與工廠屋頂大多抓不到，所以光電面積是「下限」。</li>
+  <li><b>「樹」的定義會影響結果。</b>本站採嚴格定義（整年都很綠的木本植被），果園、檳榔、竹林可能被算成農地；因此另外提供寬鬆定義的數字。</li>
+  <li><b>2017 年只當參考。</b>那年只有一顆 Sentinel-2 衛星，照片少、樹林會被低估，所以統計從 2018 年開始。</li>
+  <li><b>{{ y2 }} 年的新案場還沒有隔年確認</b>，誤判機率較高。</li>
+  <li><b>無法逐案對到政府案場。</b>能源署清單只有地號，沒有公開座標，所以只能以鄉鎮比對。</li>
+  <li>地形用的是 30 公尺的數值地表模型，山坡地是依法定定義（標高 100 公尺以上或坡度 5% 以上）推估，非官方劃定範圍。</li>
+</ul>
+
+<h2>6. 名詞小辭典</h2>
+<dl class="row small">
+  <dt class="col-sm-3">公頃</dt><dd class="col-sm-9">面積單位，100 m × 100 m = 10,000 平方公尺 ≈ 3,025 坪 ≈ 1.03 甲。</dd>
+  <dt class="col-sm-3">Sentinel-2</dt><dd class="col-sm-9">歐洲太空總署的免費地球觀測衛星，解析度 10 公尺，每 5 天拍一次台灣。</dd>
+  <dt class="col-sm-3">NDVI（植生指標）</dt><dd class="col-sm-9">用紅光與近紅外光計算「有多綠」，越接近 1 植物越茂盛；BigGIS 也用它判斷森林與裸露地。</dd>
+  <dt class="col-sm-3">基準年</dt><dd class="col-sm-9">{{ y1 }} 年。之前就存在的太陽能板不算「新增」。</dd>
+  <dt class="col-sm-3">漁電共生</dt><dd class="col-sm-9">在魚塭上方或旁邊架設太陽能板，養殖與發電並行；本站歸在「水體」前身。</dd>
+  <dt class="col-sm-3">MW（百萬瓦）</dt><dd class="col-sm-9">發電設備容量。地面型光電大約每 1 MW 需要 1–1.7 公頃土地。</dd>
+</dl>
+
+<h2>7. 想看更多？</h2>
+<ul>
+  <li><a href="map.html">互動地圖</a>：放大到你家附近，看每一塊太陽能板蓋之前是什麼。</li>
+  <li><a href="counties.html">縣市統計</a>、<a href="validation.html">驗證與圖資</a>、<a href="method.html">完整方法</a>、<a href="data.html">資料下載</a>。</li>
+  <li>原始碼：<a href="https://github.com/richliu/treecrowns" target="_blank">github.com/richliu/treecrowns</a></li>
+</ul>
+</div></div>
+{% endblock %}

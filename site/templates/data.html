@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}資料下載 - 台灣樹冠與太陽光電變遷{% endblock %}
+{% block content %}
+<h1 class="h4 fw-bold">資料下載</h1>
+<ul class="list-group">
+  {% for f, desc in files %}
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    <span><a href="{{ f }}">{{ f }}</a><br><small class="text-muted">{{ desc }}</small></span>
+    <span class="badge text-bg-light">{{ sizes[f] }}</span>
+  </li>
+  {% endfor %}
+</ul>
+<p class="small text-muted mt-3">GeoJSON 座標為 WGS84（EPSG:4326）；面積以 UTM 投影計算。圖磚為 XYZ PNG，網址格式 <code>tiles/&lt;圖層&gt;/{z}/{x}/{y}.png</code>，縮放層級 7–13。</p>
+{% endblock %}

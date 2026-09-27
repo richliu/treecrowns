@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4">
+  <h1 class="h3 fw-bold">台灣太陽光電與樹冠變遷 <small class="text-muted fs-6">{{ y1 }} – {{ y2 }}</small></h1>
+  <p class="text-secondary mb-0">以 Sentinel-2 衛星每年一張的去雲合成影像，逐像元追蹤 {{ y1 }}（基準年）之後每一塊新出現的疑似太陽能板，
+  判斷它在蓋光電之前是<b>水體（魚塭、鹽田）</b>、<b>農地</b>、<b>裸露地</b>還是<b>樹林</b>。{% if ref %}{{ ref|join("、") }} 只當參考年。{% endif %}</p>
+</div>
+
+<div class="alert alert-light border small py-2"><i class="bi bi-rulers"></i> <b>單位</b>：{{ unit_note }}。
+  想看白話說明請到 <a href="about.html">成果說明</a>。</div>
+<div class="row g-3 mb-4">
+  {% for label, value, unit, cls, note, cmp in cards %}
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body">
+        <div class="small text-secondary">{{ label }}</div>
+        <div class="fs-3 fw-bold {{ cls }}">{{ value }} <span class="fs-6 fw-normal">{{ unit }}</span></div>
+        {% if cmp %}<div class="small fw-semibold text-body-secondary">{{ cmp }}</div>{% endif %}
+        <div class="small text-muted">{{ note }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-bold">每年新增疑似光電面積，依「蓋之前是什麼」（公頃）</h2>
+      <div style="height:340px"><canvas id="chartInstall"></canvas></div>
+      <p class="small text-muted mt-2 mb-0">完工年 = 第一次偵測為太陽能板、且隔年仍是的年份；{{ y2 }} 只有一年觀測，尚待確認。
+      前身依完工前各年類別判斷：樹冠過半 → 樹冠；水體 ≥ 1/3 年 → 水體；其餘看農地 / 裸露地何者較多。</p>
+    </div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-bold">新增光電的前身比例（{{ y1|int + 1 }}–{{ y2 }}）</h2>
+      <div style="height:340px"><canvas id="chartPred"></canvas></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body">
+  <h2 class="h6 fw-bold">各縣市新增光電與前身（{{ y1|int + 1 }}–{{ y2 }}，公頃）</h2>
+  <div style="height:540px"><canvas id="chartCounty"></canvas></div>
+</div></div>
+
+<div class="row g-4 mt-0">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-bold">全台疑似光電面積 vs 樹冠比例</h2>
+      <div style="height:300px"><canvas id="chartTrend"></canvas></div>
+      <p class="small text-muted mt-2 mb-0">灰色點為參考年（{{ ref|join("、") }}：只有 Sentinel-2A 一顆衛星，觀測少、樹冠系統性低估）。
+      樹冠比例年際 ±2–3% 的起伏多屬合成雜訊。</p>
+    </div></div>
+  </div>
+  {% if sens %}
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-bold">「砍樹」定義的敏感度（完工前 NDVI）</h2>
+      <table class="table table-sm small mb-0">
+        <thead><tr><th>完工前的地表</th><th class="text-end">公頃</th><th class="text-end">佔新增</th></tr></thead>
+        <tbody>
+        {% for d in sens.defs %}{% set v = sens.total[d.key] %}
+          <tr><td>{{ d.label }}</td><td class="text-end fw-semibold">{{ "{:,.0f}".format(v) }}</td>
+            <td class="text-end">{{ "%.1f"|format(100 * v / sens.total.pv_new) }}%</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p class="small text-muted mt-2 mb-0">「樹」的定義越寬鬆（含果園、檳榔、竹林），砍樹光電面積越大；以此判讀上下限。</p>
+    </div></div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body">
+  <h2 class="h6 fw-bold">原為樹冠面積最大的疑似光電案場</h2>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle small mb-0">
+    <thead><tr><th>#</th><th>縣市</th><th>鄉鎮</th><th>完工年</th><th class="text-end">案場（公頃）</th><th class="text-end">原為樹冠（公頃）</th>
+      <th class="text-end">標高 (m)</th><th class="text-end">坡度 (%)</th><th class="text-end">國有林</th><th></th></tr></thead>
+    <tbody>
+    {% for f in top_sites %}
+      <tr><td>{{ loop.index }}</td><td>{{ f.county or "—" }}</td><td>{{ f.town or "" }}</td>
+        <td>{{ f.year }}{% if f.year == years[-1] %} <span class="badge text-bg-warning" title="僅最後一年偵測到，尚未經隔年確認">待確認</span>{% endif %}</td>
+        <td class="text-end">{{ "%.1f"|format(f.area_ha) }}</td><td class="text-end fw-semibold text-danger">{{ "%.1f"|format(f.tree_ha) }}</td>
+        <td class="text-end">{{ f.elev|int if f.elev is not none else "" }}</td>
+        <td class="text-end">{{ f.slope if f.slope is not none else "" }}</td>
+        <td class="text-end">{% if f.nat_forest %}{{ (f.nat_forest * 100)|round|int }}%{% endif %}</td>
+        <td><a href="map.html#16/{{ f.lat }}/{{ f.lon }}">地圖 <i class="bi bi-box-arrow-up-right"></i></a></td></tr>
+    {% else %}
+      <tr><td colspan="10" class="text-muted">尚無資料。</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+const S = {{ summary_json|safe }};
+const PRED = {{ pred|tojson }};
+const Y = S.years.map(String), REF = S.reference_years.map(String), T = S.total;
+const Yn = S.analysis_years.slice(1).map(String);
+new Chart(document.getElementById('chartInstall'), {
+  type: 'bar',
+  data: { labels: Yn, datasets: PRED.map(([k, n, col]) => ({ label: n, data: Yn.map(y => T.pred_install[y][k]), backgroundColor: col })) },
+  options: { maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: '公頃' } } } }
+});
+new Chart(document.getElementById('chartPred'), {
+  type: 'doughnut',
+  data: { labels: PRED.map(p => p[1]), datasets: [{ data: PRED.map(p => T.pred_total[p[0]]), backgroundColor: PRED.map(p => p[2]) }] },
+  options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' },
+    tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toLocaleString()} 公頃 (${(100 * c.raw / T.pv_new_total).toFixed(1)}%)` } } } }
+});
+const cs = S.counties.filter(c => c.pv_new_total > 1).sort((a, b) => b.pv_new_total - a.pv_new_total);
+new Chart(document.getElementById('chartCounty'), {
+  type: 'bar',
+  data: { labels: cs.map(c => c.name), datasets: PRED.map(([k, n, col]) => ({ label: n, data: cs.map(c => c.pred_total[k]), backgroundColor: col })) },
+  options: { indexAxis: 'y', maintainAspectRatio: false,
+             scales: { x: { stacked: true, title: { display: true, text: '公頃' } }, y: { stacked: true } } }
+});
+const area = T.area_ha, isRef = y => REF.includes(y);
+new Chart(document.getElementById('chartTrend'), {
+  data: { labels: Y, datasets: [
+    { type: 'line', label: '疑似光電面積（公頃）', data: Y.map(y => T.yearly[y].pv_est), borderColor: '#7b2cbf', yAxisID: 'y',
+      pointBackgroundColor: Y.map(y => isRef(y) ? '#bbb' : '#7b2cbf'), segment: { borderDash: c => isRef(Y[c.p0DataIndex]) ? [4, 4] : undefined } },
+    { type: 'line', label: '樹冠比例 (%)', data: Y.map(y => 100 * T.yearly[y].tree_est / area), borderColor: '#227832', yAxisID: 'y2',
+      pointBackgroundColor: Y.map(y => isRef(y) ? '#bbb' : '#227832'), segment: { borderDash: c => isRef(Y[c.p0DataIndex]) ? [4, 4] : undefined } } ]},
+  options: { maintainAspectRatio: false, scales: {
+    y: { position: 'left', title: { display: true, text: '光電（公頃）' }, beginAtZero: true },
+    y2: { position: 'right', title: { display: true, text: '樹冠 %' }, grid: { drawOnChartArea: false } } } }
+});
+</script>
+{% endblock %}

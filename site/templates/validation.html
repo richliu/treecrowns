@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}驗證與圖資 - 台灣樹冠與太陽光電變遷{% endblock %}
+{% block head %}<link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">{% endblock %}
+{% block content %}
+<h1 class="h4 fw-bold">驗證與圖資套疊（第二階段）</h1>
+<p class="small text-secondary">以政府開放資料檢驗衛星偵測結果，並把疑似光電案場套上地形、山坡地與國有林圖資。</p>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+    <div class="small text-secondary">能源署 電業級光電案場（{{ V.plants_by_year.keys()|min }}–{{ V.plants_by_year.keys()|max }} 取得施工許可）</div>
+    <div class="fs-4 fw-bold">{{ V.towns.plants_n }} 案 / {{ "{:,.0f}".format(V.towns.plants_land_ha) }} 公頃</div>
+    <div class="small text-muted">{{ "{:,.0f}".format(V.towns.plants_mw) }} MW；每 MW 約 {{ "%.2f"|format(V.towns.plants_land_ha / V.towns.plants_mw) }} 公頃土地</div>
+  </div></div></div>
+  <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+    <div class="small text-secondary">鄉鎮層級相關係數（案場土地面積 vs 本站偵測）</div>
+    <div class="fs-4 fw-bold">r = {{ V.towns.corr }}</div>
+    <div class="small text-muted">案場 ≥ 20 公頃的鄉鎮：偵測面積約為案場土地的 {{ (V.towns.ratio_det_to_land * 100)|round|int }}%（面板只蓋部分土地）</div>
+  </div></div></div>
+  <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+    <div class="small text-secondary">新增光電案場位於山坡地（DEM 推估 ≥ 50% 面積）</div>
+    <div class="fs-4 fw-bold">{{ V.sites.by_terrain.slopeland.n }} 處 / {{ "{:,.0f}".format(V.sites.by_terrain.slopeland.area) }} 公頃</div>
+    <div class="small text-muted">其中原為樹冠 {{ "{:,.0f}".format(V.sites.by_terrain.slopeland.tree) }} 公頃；平地原為樹冠 {{ "{:,.0f}".format(V.sites.by_terrain.flat.tree) }} 公頃</div>
+  </div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">全國：偵測光電面積 vs 能源署累計裝置容量</h2>
+    <div style="height:300px"><canvas id="cNat"></canvas></div>
+    <p class="small text-muted mt-2 mb-0">累計裝置容量含屋頂型；衛星 10 m 只能看到地面型與大型屋頂，因此面積成長應與「地面型」同步但低於總容量換算值。</p>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">鄉鎮：能源署電業級案場土地 vs 本站偵測新增光電（公頃）</h2>
+    <div style="height:300px"><canvas id="cTown"></canvas></div>
+    <p class="small text-muted mt-2 mb-0">每點一個鄉鎮。能源署清單只含取得施工許可的電業級（≥ 2 MW）案場，不含小型地面型與屋頂型；
+    偵測面積為太陽能板覆蓋像元，不含案場內的道路、空地。</p>
+  </div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body">
+  <h2 class="h6 fw-bold">新增光電的地形與國有林統計（{{ y1|int + 1 }}–{{ y2 }}，公頃）</h2>
+  <table class="table table-sm small mb-0">
+    <thead><tr><th>位置</th><th class="text-end">案場數</th><th class="text-end">面積</th>
+      {% for k, n, col in pred %}<th class="text-end"><span style="color:{{ col }}">■</span> 原為{{ n.split("（")[0] }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for key, label in [("slopeland","山坡地（DEM 推估：標高 ≥ 100 m 或坡度 ≥ 5%，≥ 50% 面積）"),("flat","平地"),("nat_forest","國有林事業區內（≥ 50% 面積）")] %}
+      {% set r = V.sites.by_terrain[key] %}
+      <tr><td>{{ label }}</td><td class="text-end">{{ r.n }}</td><td class="text-end">{{ "{:,.0f}".format(r.area) }}</td>
+        {% for k, n, col in pred %}<td class="text-end{% if k == 'tree' %} fw-bold text-danger{% endif %}">{{ "{:,.1f}".format(r[k]) }}</td>{% endfor %}</tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="small text-muted mt-2 mb-0">山坡地法定定義為標高 100 公尺以上，或標高未滿 100 公尺而平均坡度 5% 以上；此處以 Copernicus DEM 30 m（地表模型，含樹高 / 建物）逐像元推估。
+  官方山坡地範圍圖（水保法）只有非六都可下載，已寫入每個案場屬性（slopeland_off）；國有林事業區使用林業保育署 114 年版。</p>
+</div></div>
+
+<div class="row g-4 mt-0">
+  <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">縣市：偵測新增光電 vs 同意備案容量（{{ y1|int + 1 }}–{{ y2 }}）</h2>
+    <div class="table-responsive">
+    <table id="tC" class="table table-sm small">
+      <thead><tr><th>縣市</th><th>偵測新增（公頃）</th><th>同意備案 (MW)</th><th>每 MW 偵測面積（公頃）</th></tr></thead>
+      <tbody>{% for c in V.counties if c.approved_mw > 0 %}
+        <tr><td>{{ c.county }}</td><td data-sort="{{ c.det_new }}">{{ "{:,.1f}".format(c.det_new) }}</td>
+          <td data-sort="{{ c.approved_mw }}">{{ "{:,.0f}".format(c.approved_mw) }}</td>
+          <td data-sort="{{ c.ha_per_mw or 0 }}">{{ c.ha_per_mw if c.ha_per_mw is not none else "—" }}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    <p class="small text-muted mb-0">同意備案容量含屋頂型與尚未完工案件。每 MW 偵測面積越低，代表該縣市以屋頂型 / 小型案場為主（衛星看不到），
+    或核准後尚未興建。</p>
+  </div></div></div>
+  <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h2 class="h6 fw-bold">能源署電業級案場（依取得施工許可年）</h2>
+    <table class="table table-sm small mb-0">
+      <thead><tr><th>年</th><th class="text-end">案數</th><th class="text-end">土地（公頃）</th><th class="text-end">MW</th></tr></thead>
+      <tbody>{% for y, r in V.plants_by_year.items() %}
+        <tr><td>{{ y }}</td><td class="text-end">{{ r.n|int }}</td><td class="text-end">{{ "{:,.0f}".format(r.land_ha) }}</td><td class="text-end">{{ "{:,.0f}".format(r.mw) }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+  </div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body">
+  <h2 class="h6 fw-bold">鄉鎮比對明細</h2>
+  <div class="table-responsive">
+  <table id="tT" class="table table-sm small">
+    <thead><tr><th>縣市</th><th>鄉鎮</th><th>電業級案數</th><th>案場土地（公頃）</th><th>MW</th><th>偵測新增（公頃）</th>
+      {% for k, n, col in pred %}<th><span style="color:{{ col }}">■</span> {{ n.split("（")[0] }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for t in V.towns.towns %}
+      <tr><td>{{ t.county }}</td><td>{{ t.town }}</td><td data-sort="{{ t.plant_n }}">{{ t.plant_n }}</td>
+        <td data-sort="{{ t.plant_land }}">{{ "{:,.1f}".format(t.plant_land) }}</td><td data-sort="{{ t.plant_mw }}">{{ "{:,.1f}".format(t.plant_mw) }}</td>
+        <td data-sort="{{ t.det }}" class="fw-semibold">{{ "{:,.1f}".format(t.det) }}</td>
+        {% for k, n, col in pred %}<td data-sort="{{ t['det_' + k] }}">{{ "{:,.1f}".format(t['det_' + k]) }}</td>{% endfor %}</tr>
+    {% endfor %}</tbody>
+  </table></div>
+</div></div>
+
+<div class="card border-0 shadow-sm mt-4"><div class="card-body small">
+  <h2 class="h6 fw-bold">資料來源</h2>
+  <ul class="mb-0">
+    <li>經濟部能源署：取得電業設置發電設備工作許可證太陽光電案場土地地號（108–113 年，data.gov.tw #176025）、各年度各縣市太陽光電發電設備同意備案核准情形（#16423）、再生能源裝置容量年資料（#163718）</li>
+    <li>農業部農村發展及水土保持署：115 年度山坡地範圍圖（水保法、不含六都，#178645）。含六都版本目前只在 BigGIS 圖台提供圖層，未開放下載。</li>
+    <li>農業部林業及自然保育署：國有林事業區圖 1141（#56699）</li>
+    <li>Copernicus DEM GLO-30（ESA，AWS Open Data）；鄉鎮界：taiwan-atlas（內政部）</li>
+    <li>地號無法以開放 API 轉為座標（國土測繪中心搜尋服務只支援門牌），因此以鄉鎮為單位比對。</li>
+  </ul>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/umd/simple-datatables.min.js"></script>
+<script>
+const V = {{ v_json|safe }};
+const REF = {{ ref|tojson }};
+const N = V.national;
+new Chart(document.getElementById('cNat'), {
+  data: { labels: N.map(r => r.year), datasets: [
+    { type: 'line', label: '偵測光電面積（公頃）', data: N.map(r => r.det_pv), borderColor: '#7b2cbf', yAxisID: 'y',
+      pointBackgroundColor: N.map(r => REF.includes(r.year) ? '#bbb' : '#7b2cbf') },
+    { type: 'line', label: '累計裝置容量 (MW)', data: N.map(r => r.cap_mw), borderColor: '#e67e22', yAxisID: 'y2' },
+    { type: 'bar', label: '當年同意備案 (MW)', data: N.map(r => r.approved_mw), backgroundColor: 'rgba(230,126,34,.25)', yAxisID: 'y2' } ]},
+  options: { maintainAspectRatio: false, scales: {
+    y: { position: 'left', title: { display: true, text: '公頃' }, beginAtZero: true },
+    y2: { position: 'right', title: { display: true, text: 'MW' }, grid: { drawOnChartArea: false }, beginAtZero: true } } }
+});
+const TT = V.towns.towns.filter(t => t.plant_land > 0 || t.det > 5);
+new Chart(document.getElementById('cTown'), {
+  type: 'scatter',
+  data: { datasets: [{ label: '鄉鎮', data: TT.map(t => ({ x: t.plant_land, y: t.det, n: `${t.county}${t.town}` })),
+                       backgroundColor: 'rgba(59,82,139,.6)' }] },
+  options: { maintainAspectRatio: false, plugins: { legend: { display: false },
+    tooltip: { callbacks: { label: c => `${c.raw.n}：案場土地 ${c.raw.x.toFixed(0)} 公頃，偵測 ${c.raw.y.toFixed(0)} 公頃` } } },
+    scales: { x: { title: { display: true, text: '能源署電業級案場土地（公頃）' } }, y: { title: { display: true, text: '本站偵測新增光電（公頃）' } } } }
+});
+const opt = { perPage: 15, searchable: true, labels: { placeholder: '搜尋…', perPage: '每頁', noRows: '無資料', info: '第 {start}–{end} 筆，共 {rows} 筆' } };
+new simpleDatatables.DataTable('#tC', { ...opt, columns: [{ select: [1,2,3], type: 'number' }, { select: 1, sort: 'desc' }] });
+new simpleDatatables.DataTable('#tT', { ...opt, columns: [{ select: [2,3,4,5,6,7,8,9], type: 'number' }, { select: 3, sort: 'desc' }] });
+</script>
+{% endblock %}
