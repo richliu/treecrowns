@@ -47,6 +47,7 @@ pipeline/
   classify.py         分類（樹冠 / 低植生 / 裸露地 / 水體 / 陰影 / 太陽能板）
   timeseries.py       逐像元時間序列：完工年、前身、樹冠消失 → data/stats/timeseries.json
   sensitivity.py      砍樹光電的定義敏感度
+  tree_path.py        「樹 → 空窗（裸露 / 低植生）→ 光電」路徑分析
   overlay.py          外部圖資套疊與驗證 → data/stats/validation.json
   tiles.py            XYZ 圖磚
   build_site.py       Jinja2 模板 → public/
